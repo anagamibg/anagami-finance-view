@@ -1,0 +1,75 @@
+/node_modules
+/public/hot
+/public/storage
+/public/css/app-custom.css
+/public/user-uploads/*
+!public/user-uploads/.htaccess
+/storage/*.key
+/vendor
+.env
+.env.backup
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.php-cs-fixer.cache
+/.idea
+/.vscode
+/.vagrant
+*.zip
+.DS_Store
+mix.js.map
+mix-manifest.json
+ngrok
+/storage/installed
+/storage/framework/laravel-excel/
+grumphp.yml
+/bootstrap/cache/*
+storage/reviewed
+storage/fonts/installed-fonts.json
+resources/lang/*
+!resources/lang/eng/
+!resources/lang/bg/
+!resources/lang/vendor/backup/eng
+!resources/lang/eng.json
+froiden-verify/
+resources/views/sections/custom_script.blade.php
+demo_db_copy.sql
+database/maxmind/
+public/css/app-custom.css
+public/css/theme-custom.css
+public/css/custom-css/theme-custom.css
+merge-amc-branches.sh
+pull_modules.sh
+
+# --- Secrets, backups and local-only material (S6 / P7) ---
+# Every env variant stays out of git; only the example file is tracked.
+.env.*
+!.env.example
+# Backups / dumps (never commit database or file backups)
+*.backup
+*.bak
+*.sql
+*.sql.gz
+*.dump
+*.tgz
+*.tar.gz
+# ...except Laravel's committed schema dump (no row data)
+!/database/schema/mysql-schema.dump
+# Keys, certificates, demo credentials
+*.pem
+*.key
+demo-passwords*
+# Local tooling and add-on code that lives only on the server / locally
+.claude/
+/Modules/
+# Raw security evidence that must not be published
+/docs/mvp/security/private/
+
+# Upstream 6.0.19 (docs/ is ours and stays tracked)
+public/app-icons/cache/*
+
+public/monitor/installers/WorksuiteDemo-1.0.0.dmg
+public/monitor/installers/WorksuiteDemoSetup-1.0.0.deb
+public/monitor/installers/WorksuiteDemoSetup-1.0.0.exe
