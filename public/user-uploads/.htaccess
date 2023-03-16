@@ -1,0 +1,20 @@
+# Deny script execution in uploads
+<FilesMatch "\.(?i:php|php[0-9]|phtml|pht|phtm|phar|shtml|cgi|pl|asp|aspx|js)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# Force downloads for potentially dangerous markup (XSS)
+<FilesMatch "\.(?i:html|htm|svg|svgz)$">
+    Header set Content-Disposition "attachment"
+    Header set X-Content-Type-Options "nosniff"
+</FilesMatch>
