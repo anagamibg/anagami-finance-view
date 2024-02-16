@@ -1,0 +1,225 @@
+
+<div class="row">
+    <div class="col-md-12">
+        <x-alert type="secondary" icon="info-circle">
+            @lang('messages.earningChartNote') ({{ company()->currency->currency_code }})
+        </x-alert>
+    </div>
+</div>
+
+<div class="row">
+    @if (in_array('invoices', user_modules()) && (in_array('total_paid_invoices', $activeWidgets) || in_array('total_unpaid_invoices', $activeWidgets)))
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <div
+                class="bg-white p-3 rounded b-shadow-4 d-flex justify-content-between align-items-center dbk-dash-stat mb-4 mb-md-0 mb-lg-0">
+                <div class="d-block ">
+                    <h5 class="f-13 f-w-500 mb-20 text-darkest-grey">@lang('app.menu.invoices')</h5>
+                    <div class="d-flex">
+                        @if (in_array('total_paid_invoices', $activeWidgets))
+                            <a href="javascript:;" id="totalPaidInvoices">
+                                <p class="mb-0 f-15 font-weight-bold text-blue d-grid mr-5">
+                                    {{ $totalPaidInvoice }}<span class="f-12 font-weight-normal text-lightest">
+                                        @lang('modules.dashboard.totalPaidInvoices') </span>
+                                </p>
+                            </a>
+                        @endif
+
+                        @if (in_array('total_unpaid_invoices', $activeWidgets))
+                            <a href="javascript:;" id="totalPendingInvoices">
+                                <p class="mb-0 f-15 font-weight-bold text-red d-grid">
+                                    {{ $totalUnPaidInvoice }}<span
+                                        class="f-12 font-weight-normal text-lightest">@lang('modules.dashboard.totalUnpaidInvoices')</span>
+                                </p>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+                <div class="d-block">
+                    <i class="fa fa-file-invoice text-lightest f-18"></i>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if (in_array('invoices', user_modules()) && (in_array('total_expenses', $activeWidgets) || in_array('total_earnings', $activeWidgets)))
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <div
+                class="bg-white p-3 rounded b-shadow-4 d-flex justify-content-between align-items-center dbk-dash-stat mb-4 mb-md-0 mb-lg-0">
+                <div class="d-block ">
+                    <h5 class="f-13 f-w-500 mb-20 text-darkest-grey">@lang('app.menu.finance')</h5>
+                    <a href="javascript:;" id="totalEarnings">
+                        <div class="d-flex">
+                            @if (in_array('total_expenses', $activeWidgets) && in_array('expenses', user_modules())) {{-- databackd: + expenses --}}
+                                <p class="mb-0 f-15 font-weight-bold text-blue d-grid mr-5">
+                                    {{ currency_format($totalExpenses, company()->currency_id) }}<span
+                                        class="f-12 font-weight-normal text-lightest">
+                                        @lang('modules.dashboard.totalExpenses') </span>
+                                </p>
+                            @endif
+
+                            @if (in_array('total_earnings', $activeWidgets))
+                                <p class="mb-0 f-15 font-weight-bold text-dark-green d-grid">
+                                    {{ currency_format($totalEarnings, company()->currency_id) }}<span
+                                        class="f-12 font-weight-normal text-lightest">@lang('modules.dashboard.totalEarnings')</span>
+                                </p>
+                            @endif
+                        </div>
+                    </a>
+                </div>
+                <div class="d-block">
+                    <i class="fa fa-coins text-lightest f-18"></i>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if (in_array('invoices', user_modules()) && in_array('total_pending_amount', $activeWidgets))
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <a href="javascript:;" id="totalPendingAmount">
+                <x-cards.widget :title="__('modules.dashboard.totalPendingAmount')"
+                    :value="currency_format($totalPendingAmount, company()->currency_id)" icon="coins" />
+            </a>
+        </div>
+    @endif
+
+</div>
+
+<div class="row">
+    @if (in_array('invoices', user_modules()) && in_array('invoice_overview', $activeWidgets))
+        <div class="col-sm-12 col-lg-6 mt-4">
+            <x-cards.data
+                :title="__('modules.dashboard.invoiceOverview').' <i class=\'fa fa-question-circle\' data-toggle=\'popover\' data-placement=\'top\' data-content=\''.__('messages.invoicesWidgetMessage').'\' data-trigger=\'hover\'></i>'">
+                @if (array_sum($invoiceOverviewChartData['values']) > 0)
+                    <a href="javascript:;" class="text-darkest-grey f-w-500 piechart-full-screen" data-chart-id="task-chart1" data-chart-data="{{ json_encode($invoiceOverviewChartData) }}"><i class="fas fa-expand float-right mr-3"></i></a>
+                @endif
+                @include('dashboard._dbk-chart', ['id' => 'task-chart1', 'type' => 'donut', 'labels' => $invoiceOverviewChartData['labels'], 'values' => $invoiceOverviewChartData['values'], 'colors' => $invoiceOverviewChartData['colors'], 'keepColors' => true])
+            </x-cards.data>
+        </div>
+    @endif
+
+    @if (in_array('estimates', user_modules()) && in_array('estimate_overview', $activeWidgets) && !databackd_hidden('menu', 'estimates')) {{-- databackd: hidden by config --}}
+        <div class="col-sm-12 col-lg-6 mt-4">
+            <x-cards.data
+                :title="__('modules.dashboard.estimateOverview').' <i class=\'fa fa-question-circle\' data-toggle=\'popover\' data-placement=\'top\' data-content=\''.__('messages.estimatesWidgetMessage').'\' data-trigger=\'hover\'></i>'">
+                @if (array_sum($estimateOverviewChartData['values']) > 0)
+                    <a href="javascript:;" class="text-darkest-grey f-w-500 piechart-full-screen" data-chart-id="task-chart2" data-chart-data="{{ json_encode($estimateOverviewChartData) }}"><i class="fas fa-expand float-right mr-3"></i></a>
+                @endif
+                @include('dashboard._dbk-chart', ['id' => 'task-chart2', 'type' => 'donut', 'labels' => $estimateOverviewChartData['labels'], 'values' => $estimateOverviewChartData['values'], 'colors' => $estimateOverviewChartData['colors'], 'keepColors' => true])
+            </x-cards.data>
+        </div>
+    @endif
+
+    @if (in_array('leads', user_modules()) && in_array('proposal_overview', $activeWidgets) && !databackd_hidden('menu', 'proposals')) {{-- databackd: hidden by config --}}
+        <div class="col-sm-12 col-lg-6 mt-4">
+            <x-cards.data
+                :title="__('modules.dashboard.proposalOverview').' <i class=\'fa fa-question-circle\' data-toggle=\'popover\' data-placement=\'top\' data-content=\''.__('messages.proposalsWidgetMessage').'\' data-trigger=\'hover\'></i>'">
+                @if (array_sum($proposalOverviewChartData['values']) > 0)
+                    <a href="javascript:;" class="text-darkest-grey f-w-500 piechart-full-screen" data-chart-id="task-chart3" data-chart-data="{{ json_encode($proposalOverviewChartData) }}"><i class="fas fa-expand float-right mr-3"></i></a>
+                @endif
+                @include('dashboard._dbk-chart', ['id' => 'task-chart3', 'type' => 'donut', 'labels' => $proposalOverviewChartData['labels'], 'values' => $proposalOverviewChartData['values'], 'colors' => $proposalOverviewChartData['colors'], 'keepColors' => true])
+            </x-cards.data>
+        </div>
+    @endif
+
+    @if (in_array('payments', user_modules()) && in_array('earnings_by_client', $activeWidgets))
+        <div class="col-sm-12 col-lg-6 mt-4">
+            <x-cards.data
+                :title="__('modules.dashboard.clientWiseEarnings').' <i class=\'fa fa-question-circle\' data-toggle=\'popover\' data-placement=\'top\' data-content=\''.__('messages.earningChartNote').'\' data-trigger=\'hover\'></i>'">
+                @include('dashboard._dbk-chart', ['id' => 'task-chart4', 'type' => 'bar', 'chartData' => $clientEarningChart, 'unit' => company()->currency->currency_code === 'EUR' ? 'money' : 'number', 'role' => 'revenue', 'horizontal' => true])
+            </x-cards.data>
+        </div>
+    @endif
+
+    @if (in_array('payments', user_modules()) && in_array('projects', user_modules()) && in_array('earnings_by_projects', $activeWidgets))
+        <div class="col-sm-12 col-lg-6 mt-4">
+            <x-cards.data
+                :title="__('modules.dashboard.earningsByProjects').' <i class=\'fa fa-question-circle\' data-toggle=\'popover\' data-placement=\'top\' data-content=\''.__('messages.earningChartNote').'\' data-trigger=\'hover\'></i>'">
+                @include('dashboard._dbk-chart', ['id' => 'task-chart5', 'type' => 'bar', 'chartData' => $projectEarningChartData, 'unit' => company()->currency->currency_code === 'EUR' ? 'money' : 'number', 'role' => 'revenue', 'horizontal' => true])
+            </x-cards.data>
+        </div>
+    @endif
+
+</div>
+
+<script>
+    $('#save-dashboard-widget').click(function() {
+        $.easyAjax({
+            url: "{{ route('dashboard.widget', 'admin-finance-dashboard') }}",
+            container: '#dashboardWidgetForm',
+            blockUI: true,
+            type: "POST",
+            redirect: true,
+            data: $('#dashboardWidgetForm').serialize(),
+            success: function() {
+                window.location.reload();
+            }
+        })
+    });
+
+    @if (in_array(user()->permission('view_invoices'), ['all', 'added', 'owned', 'both'])) {{-- databackd: the click opens a page the user may not see --}}
+    $('#totalPendingAmount').click(function() {
+        var dateRange = $('#datatableRange2').data('daterangepicker');
+        var startDate = dateRange.startDate.format('{{ company()->moment_date_format }}');
+        var endDate = dateRange.endDate.format('{{ company()->moment_date_format }}');
+
+        startDate = encodeURIComponent(startDate);
+        endDate = encodeURIComponent(endDate);
+
+        var url = "{{ route('invoices.index') }}";
+        string = `?status=pending&start=${startDate}&end=${endDate}`;
+        url += string;
+        window.location.href = url;
+    });
+    @endif
+
+    @if (in_array('reports', user_modules()) && user()->permission('view_income_expense_report') == 'all') {{-- databackd: the click opens a page the user may not see --}}
+    $('#totalEarnings').click(function() {
+        var dateRange = getDateRange();
+        var url = `{{ route('income-expense-report.index') }}`;
+
+        string = `?start=${dateRange.startDate}&end=${dateRange.endDate}`;
+        url += string;
+
+        window.location.href = url;
+    });
+    @endif
+
+    @if (in_array(user()->permission('view_invoices'), ['all', 'added', 'owned', 'both'])) {{-- databackd: the click opens a page the user may not see --}}
+    $('#totalPaidInvoices').click(function() {
+        var dateRange = getDateRange();
+        var url = `{{ route('invoices.index') . '?status=paid' }}`;
+
+        string = `&start=${dateRange.startDate}&end=${dateRange.endDate}`;
+        url += string;
+
+        window.location.href = url;
+    });
+    @endif
+
+    @if (in_array(user()->permission('view_invoices'), ['all', 'added', 'owned', 'both'])) {{-- databackd: the click opens a page the user may not see --}}
+    $('#totalPendingInvoices').click(function() {
+        var dateRange = getDateRange();
+        var url = `{{ route('invoices.index') . '?status=pending' }}`;
+
+        string = `&start=${dateRange.startDate}&end=${dateRange.endDate}`;
+        url += string;
+
+        window.location.href = url;
+    });
+    @endif
+
+    function getDateRange() {
+        var dateRange = $('#datatableRange2').data('daterangepicker');
+        var startDate = dateRange.startDate.format('{{ company()->moment_date_format }}');
+        var endDate = dateRange.endDate.format('{{ company()->moment_date_format }}');
+
+        startDate = encodeURIComponent(startDate);
+        endDate = encodeURIComponent(endDate);
+
+        var data = [];
+        data['startDate'] = startDate;
+        data['endDate'] = endDate;
+
+        return data;
+    }
+</script>
