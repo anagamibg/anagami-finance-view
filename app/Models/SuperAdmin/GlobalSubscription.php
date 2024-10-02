@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Models\SuperAdmin;
+
+use App\Models\Company;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Builder;
+
+class GlobalSubscription extends BaseModel
+{
+
+    protected $table = 'global_subscriptions';
+    protected $dates = ['created_at'];
+    protected $casts = [
+        'created_at',
+        'pay_date' => 'datetime',
+        'next_pay_date' => 'datetime',
+        'subscribed_on_date' => 'datetime',
+        'worldpay_token' => 'encrypted',
+    ];
+    protected $guarded = ['id'];
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('subscription_status', 'active');
+    }
+
+}
