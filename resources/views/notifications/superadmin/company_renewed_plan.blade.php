@@ -1,0 +1,2 @@
+<x-cards.notification :notification="$notification"  :link="(user()->is_superadmin ? route('superadmin.superadmin-invoices.index') : (databackd_hidden('pages', 'billing') ? route('dashboard') : route('billing.index')))" :image="global_setting()->logo_url"
+    :title="__('superadmin.planRenew.subject')" :text="__( 'superadmin.planRenew.text', ['company' => $notification->data['company_name'], 'package' => $notification->data['name']])" :time="$notification->created_at" />
