@@ -1,0 +1,129 @@
+// AFV design tokens — see docs/mvp/phase2/ui-guidelines.md.
+// Light values on :root, dark values on body.dark-theme (AFV's dark theme switch).
+
+:root {
+    // Surfaces & text
+    --dbk-bg: #f2f4f7;
+    --dbk-surface: #ffffff;
+    --dbk-surface-2: #f7f9fb;
+    --dbk-border: #e4e9f0;
+    --dbk-border-strong: #cfd7e2;
+    --dbk-text: #1d2633;
+    --dbk-text-2: #4f5b6b;
+    --dbk-text-muted: #66717f;
+    --dbk-grid: rgba(29, 38, 51, 0.08);
+
+    // Accent (data never uses the company theme colour --header_color)
+    --dbk-accent: #1a66c9; // 5.0:1 on --dbk-bg, 5.5:1 on white (#1d6fd6 was 4.4:1 on the page background)
+    --dbk-accent-soft: #e8f1fc;
+    --dbk-accent-text: #1a5fb8; // accent as text on --dbk-accent-soft (AA)
+
+    // Status (text-safe steps)
+    --dbk-good: #0b7a45;
+    --dbk-warning: #9a5b00;
+    --dbk-bad: #c9302c;
+    --dbk-good-soft: #e7f6ee;
+    --dbk-warning-soft: #fdf3e1;
+    --dbk-bad-soft: #fdecec;
+    --dbk-neutral-soft: #eef1f5;
+
+    // Chart series (marks, not text)
+    --dbk-revenue: #16a06a;
+    --dbk-expense: #e34948;
+    --dbk-profit: #2a78d6;
+    --dbk-cash: #6250d6;
+    --dbk-budget: #9aa5b4;
+    --dbk-forecast: #eb6834;
+    --dbk-cat-1: #2a78d6;
+    --dbk-cat-2: #eb6834;
+    --dbk-cat-3: #1baf7a;
+    --dbk-cat-4: #eda100;
+    --dbk-cat-5: #e87ba4;
+    --dbk-cat-6: #008300;
+    --dbk-cat-7: #6250d6;
+    --dbk-cat-8: #e34948;
+
+    // Chart tooltip
+    --dbk-tooltip-bg: #1d2633;
+    --dbk-tooltip-text: #ffffff;
+
+    // Type
+    --dbk-font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --dbk-fs-xs: 12px;
+    --dbk-fs-sm: 13px;
+    --dbk-fs-base: 14px;
+    --dbk-fs-lg: 15px;
+    --dbk-fs-xl: 20px;
+    --dbk-fs-kpi: 24px;
+
+    // Spacing (4 px grid)
+    --dbk-space-1: 4px;
+    --dbk-space-2: 8px;
+    --dbk-space-3: 12px;
+    --dbk-space-4: 16px;
+    --dbk-space-5: 20px;
+    --dbk-space-6: 24px;
+    --dbk-space-7: 32px;
+    --dbk-space-8: 40px;
+
+    // Radius & shadow
+    --dbk-radius-sm: 6px;
+    --dbk-radius: 10px;
+    --dbk-radius-lg: 14px;
+    --dbk-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+    --dbk-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+    --dbk-shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.14);
+    --dbk-focus-ring: 0 0 0 3px rgba(26, 102, 201, 0.25);
+
+    // Sidebar
+    --dbk-sidebar-group: rgba(255, 255, 255, 0.45);
+    --dbk-sidebar-active-bg: rgba(255, 255, 255, 0.08);
+    --dbk-sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+    --dbk-sidebar-divider: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme {
+    --dbk-bg: #181c34;
+    --dbk-surface: #1f2440;
+    --dbk-surface-2: #262c4b;
+    --dbk-border: #363d61;
+    --dbk-border-strong: #4b4e69;
+    --dbk-text: #e6e8ef;
+    --dbk-text-2: #b9bfcf;
+    --dbk-text-muted: #9aa1b5;
+    --dbk-grid: rgba(230, 232, 239, 0.1);
+
+    --dbk-accent: #5c9cf0;
+    --dbk-accent-soft: #24345c;
+    --dbk-accent-text: #8ab8f5;
+
+    --dbk-good: #3ccf86;
+    --dbk-warning: #f2b13d;
+    --dbk-bad: #ff7a72;
+    --dbk-good-soft: #183a2c;
+    --dbk-warning-soft: #3d3018;
+    --dbk-bad-soft: #45222a;
+    --dbk-neutral-soft: #2b3152;
+
+    --dbk-revenue: #1fb87b;
+    --dbk-expense: #ef6b6a;
+    --dbk-profit: #3987e5;
+    --dbk-cash: #9085e9;
+    --dbk-budget: #6f7891;
+    --dbk-forecast: #d95926;
+    --dbk-cat-1: #3987e5;
+    --dbk-cat-2: #d95926;
+    --dbk-cat-3: #199e70;
+    --dbk-cat-4: #c98500;
+    --dbk-cat-5: #d55181;
+    --dbk-cat-6: #008300;
+    --dbk-cat-7: #9085e9;
+    --dbk-cat-8: #e66767;
+
+    --dbk-tooltip-bg: #0f1226;
+    --dbk-tooltip-text: #e6e8ef;
+
+    --dbk-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --dbk-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    --dbk-focus-ring: 0 0 0 3px rgba(92, 156, 240, 0.35);
+}

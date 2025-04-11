@@ -1,0 +1,810 @@
+// AFV UI package partial: modules (S9 / P9).
+// Shared look of the standard AFV modules (clients, contracts, projects, tasks, invoices,
+// payments, expenses, bank accounts, products): buttons, form controls, DataTables lists,
+// modals, show-page tabs and detail cards. CSS-only, no view rewrites — see ui-guidelines §7–§8.
+//
+// Scoping rules:
+//  - the primary button keeps the company theme colour (--header_color from sections/theme_css);
+//  - the page filter bar (.filter-box, P2) and the invoice line-item grid (.c-inv-desc, create-invoice.scss)
+//    are left alone;
+//  - dbk-* screens already use .dbk-table / .dbk-card and are not targeted here.
+// Legacy dark-theme.scss uses !important on many of these selectors, hence the body.dark-theme blocks.
+
+// ---------------------------------------------------------------- buttons
+.btn-primary,
+.btn-secondary,
+.btn-cancel {
+    text-transform: none;
+    font-weight: 500;
+    line-height: 20px;
+    border-radius: var(--dbk-radius-sm);
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease, filter .15s ease;
+
+    &.rounded { border-radius: var(--dbk-radius-sm) !important; }
+
+    // x-forms.button-* / x-forms.link-* use "p-2" → 36 px high, roomier sides
+    padding: 8px 14px;
+    &.p-2 { padding: 8px 14px !important; }
+
+    > i.fa,
+    > i.bi,
+    > i[class^="fa-"],
+    > svg { margin-right: 6px !important; }
+
+    &:focus-visible {
+        outline: 0;
+        box-shadow: var(--dbk-focus-ring) !important;
+    }
+}
+
+// primary: theme colour stays; hover just darkens it (legacy hover was black)
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:not(:disabled):not(.disabled):active {
+    background-color: var(--header_color) !important;
+    border-color: var(--header_color) !important;
+    color: #fff !important;
+    filter: brightness(.92);
+}
+
+.btn-primary.disabled,
+.btn-primary:disabled { filter: none; }
+
+// a11y (WCAG 1.4.3): the tenant colour can be too light for white text (#ed4040 → 3.9:1). layouts/app computes
+// --dbk-primary = the same hue darkened until white text reaches 4.5:1 (identical to --header_color when it already
+// passes); the tenant setting itself is untouched. `body:not(.dark-theme)` outranks the single-class !important rules
+// of sections/theme_css; the dark theme keeps its own light primary (see the end of this file).
+body:not(.dark-theme) {
+    .btn-primary,
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:not(:disabled):not(.disabled):active,
+    .btn-primary.disabled,
+    .btn-primary:disabled {
+        background-color: var(--dbk-primary, var(--header_color)) !important;
+        border-color: var(--dbk-primary, var(--header_color)) !important;
+        color: #fff !important;
+    }
+
+    .text-primary,
+    .text-primary:hover { color: var(--dbk-primary, var(--header_color)) !important; }
+
+    .main-header .badge-primary,
+    .pagination .page-item.active .page-link,
+    .dropdown-item.active {
+        background-color: var(--dbk-primary, var(--header_color)) !important;
+        border-color: var(--dbk-primary, var(--header_color)) !important;
+        color: #fff !important;
+    }
+}
+
+// secondary: outline / quiet
+.btn-secondary {
+    background-color: var(--dbk-surface) !important;
+    border: 1px solid var(--dbk-border-strong) !important;
+    color: var(--dbk-text-2) !important;
+
+    &:hover,
+    &:focus,
+    &:not(:disabled):not(.disabled):active {
+        background-color: var(--dbk-surface-2) !important;
+        border-color: var(--dbk-text-muted) !important;
+        color: var(--dbk-text) !important;
+    }
+
+    &.disabled:hover,
+    &:disabled:hover {
+        background-color: var(--dbk-surface) !important;
+        border-color: var(--dbk-border-strong) !important;
+        color: var(--dbk-text-2) !important;
+    }
+}
+
+.btn-cancel {
+    color: var(--dbk-text-2) !important;
+
+    &:hover { background-color: var(--dbk-surface-2) !important; color: var(--dbk-text) !important; }
+}
+
+// ---------------------------------------------------------------- form controls
+.form-control {
+    border-color: var(--dbk-border-strong);
+    border-radius: var(--dbk-radius-sm);
+    color: var(--dbk-text);
+
+    &:hover { border-color: var(--dbk-text-muted); }
+
+    &:focus {
+        border-color: var(--dbk-accent);
+        box-shadow: var(--dbk-focus-ring);
+        outline: 0;
+    }
+
+    &.is-invalid,
+    &.is-invalid:focus { border-color: var(--dbk-bad); }
+
+    &.is-invalid:focus { box-shadow: 0 0 0 3px var(--dbk-bad-soft); }
+
+    &::placeholder { color: var(--dbk-text-muted); opacity: .85; }
+
+    &:disabled,
+    &[readonly] { background-color: var(--dbk-surface-2); }
+}
+
+// x-forms.text/number/email/… use "height-35" (legacy 39 px !important)
+.form-control.height-35 { height: 38px !important; }
+
+.form-group .form-control:not(textarea):not([multiple]):not(.height-35):not(.height-40):not(.height-44):not(.height-50) {
+    min-height: 38px;
+}
+
+// labels (x-forms.label: "f-14 text-dark-grey mb-12 dbk-form-label"); the filter bar (P2) keeps its own look
+label.dbk-form-label:not(.filter-box *) {
+    font-size: var(--dbk-fs-sm) !important;
+    font-weight: 500;
+    color: var(--dbk-text-2);
+
+    // required mark: same place whether the label is inside .form-group (text) or before it (x-forms.select);
+    // --dbk-bad is 5.3:1 on white (legacy #fd0202 3.9:1)
+    sup {
+        font-size: var(--dbk-fs-sm) !important;
+        top: 0;
+        right: -4px;
+        color: var(--dbk-bad);
+    }
+    .fa-question-circle { color: var(--dbk-text-muted); margin-left: 2px; }
+}
+
+.form-group .form-text.text-muted,
+.form-group small.text-muted { font-size: var(--dbk-fs-xs); color: var(--dbk-text-muted); }
+
+.invalid-feedback,
+.help-block.text-danger,
+.form-group .help-block {
+    font-size: var(--dbk-fs-xs);
+    color: var(--dbk-bad);
+}
+
+.input-group-text {
+    border-color: var(--dbk-border-strong);
+    background-color: var(--dbk-surface-2);
+    color: var(--dbk-text-muted);
+    font-size: var(--dbk-fs-sm);
+}
+
+.input-group > .input-group-prepend > .input-group-text { border-radius: var(--dbk-radius-sm) 0 0 var(--dbk-radius-sm); }
+.input-group > .input-group-append > .input-group-text,
+.input-group > .input-group-append > .btn { border-radius: 0 var(--dbk-radius-sm) var(--dbk-radius-sm) 0; }
+
+// bootstrap-select (select-picker) in forms and modals — not in the filter bar (.filter-box) or line items
+.form-group .bootstrap-select > .dropdown-toggle,
+.modal-body .bootstrap-select > .dropdown-toggle,
+.input-group .bootstrap-select.form-control > .dropdown-toggle {
+    min-height: 38px;
+    border: 1px solid var(--dbk-border-strong);
+    border-radius: var(--dbk-radius-sm);
+    background-color: var(--dbk-surface);
+    color: var(--dbk-text);
+    padding: 8px 10px;
+    font-size: var(--dbk-fs-base);
+    line-height: 20px;
+
+    &:hover { border-color: var(--dbk-text-muted); }
+}
+
+.input-group .bootstrap-select.form-control > .dropdown-toggle { border-radius: 0; }
+.input-group > .bootstrap-select.form-control:first-child > .dropdown-toggle { border-radius: var(--dbk-radius-sm) 0 0 var(--dbk-radius-sm); }
+.input-group > .bootstrap-select.form-control:last-child > .dropdown-toggle { border-radius: 0 var(--dbk-radius-sm) var(--dbk-radius-sm) 0; }
+
+.form-group .bootstrap-select.show > .dropdown-toggle,
+.modal-body .bootstrap-select.show > .dropdown-toggle,
+.form-group .bootstrap-select > .dropdown-toggle:focus,
+.modal-body .bootstrap-select > .dropdown-toggle:focus {
+    border-color: var(--dbk-accent);
+    box-shadow: var(--dbk-focus-ring) !important;
+    outline: 0 !important;
+}
+
+.form-group .bootstrap-select.form-control.is-invalid > .dropdown-toggle { border-color: var(--dbk-bad); }
+
+// shared dropdown menus (bootstrap-select, row actions, header actions)
+.bootstrap-select .dropdown-menu,
+.task_view .dropdown-menu,
+body > .dropdown-menu {
+    border: 1px solid var(--dbk-border) !important;
+    border-radius: var(--dbk-radius-sm);
+    box-shadow: var(--dbk-shadow) !important;
+    padding: 4px;
+}
+
+.bootstrap-select .dropdown-menu .dropdown-item,
+.task_view .dropdown-menu .dropdown-item,
+body > .dropdown-menu .dropdown-item {
+    border-radius: 4px;
+    font-size: var(--dbk-fs-sm);
+    padding: 7px 10px;
+}
+
+.bootstrap-select .bs-searchbox .form-control { height: 32px; }
+
+// select2
+.select2-container--default {
+    .select2-selection--single,
+    .select2-selection--multiple {
+        min-height: 38px;
+        border: 1px solid var(--dbk-border-strong);
+        border-radius: var(--dbk-radius-sm);
+        background-color: var(--dbk-surface);
+    }
+
+    .select2-selection--single {
+        .select2-selection__rendered { line-height: 36px; color: var(--dbk-text); padding-left: 10px; }
+        .select2-selection__arrow { height: 36px; }
+    }
+
+    &.select2-container--focus .select2-selection--multiple,
+    &.select2-container--open .select2-selection--single,
+    &.select2-container--open .select2-selection--multiple {
+        border-color: var(--dbk-accent);
+        box-shadow: var(--dbk-focus-ring);
+    }
+
+    .select2-selection--multiple .select2-selection__choice {
+        border: 0;
+        border-radius: 999px;
+        background-color: var(--dbk-neutral-soft);
+        color: var(--dbk-text-2);
+        font-size: var(--dbk-fs-xs);
+    }
+}
+
+.select2-dropdown {
+    border-color: var(--dbk-border);
+    border-radius: var(--dbk-radius-sm);
+    box-shadow: var(--dbk-shadow);
+}
+
+// datepicker / daterangepicker popups
+.datepicker.dropdown-menu,
+.qs-datepicker-container,
+.daterangepicker {
+    border: 1px solid var(--dbk-border) !important;
+    border-radius: var(--dbk-radius) !important;
+    box-shadow: var(--dbk-shadow) !important;
+}
+
+.datepicker table tr td,
+.datepicker table tr th { border-radius: var(--dbk-radius-sm); }
+
+// custom checkbox / toggles focus
+.custom-control-input:focus ~ .custom-control-label::before { box-shadow: var(--dbk-focus-ring); }
+
+// quill editor frame
+.ql-toolbar.ql-snow { border-color: var(--dbk-border-strong); border-radius: var(--dbk-radius-sm) var(--dbk-radius-sm) 0 0; }
+.ql-container.ql-snow { border-color: var(--dbk-border-strong); border-radius: 0 0 var(--dbk-radius-sm) var(--dbk-radius-sm); }
+
+// form footer (x-form-actions: "border-top-grey px-4 py-3")
+.w-100.border-top-grey.px-4.py-3 { gap: 8px; }
+
+// ---------------------------------------------------------------- DataTables lists (.w-tables + yajra)
+.w-tables {
+    background-color: var(--dbk-surface);
+    border: 1px solid var(--dbk-border);
+    border-radius: var(--dbk-radius) !important;
+    box-shadow: var(--dbk-shadow-sm);
+}
+
+.w-tables > .dataTables_wrapper,
+.w-tables .dataTables_wrapper { border-radius: inherit; }
+
+.w-tables .table,
+table.dataTable.table {
+    color: var(--dbk-text);
+
+    thead th,
+    thead td {
+        background-color: var(--dbk-surface-2);
+        font-size: var(--dbk-fs-xs);
+        font-weight: 600;
+        color: var(--dbk-text-muted);
+        padding: 10px 8px;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--dbk-border) !important;
+        box-shadow: none;
+        white-space: nowrap;
+    }
+
+    tbody td {
+        font-size: var(--dbk-fs-sm);
+        color: var(--dbk-text);
+        padding: 10px 8px;
+        height: 44px;
+        vertical-align: middle;
+        box-shadow: 0 1px 0 0 var(--dbk-border);
+    }
+
+    thead th:first-child,
+    tbody td:first-child { padding-left: 16px; }
+
+    thead th:last-child,
+    tbody td:last-child { padding-right: 16px; }
+
+    tbody tr:last-child td { box-shadow: none; }
+
+    tbody td a:not(.btn):not(.dropdown-item):not(.task_view_more):not(.taskView) { color: var(--dbk-text); }
+    tbody td a:not(.btn):not(.dropdown-item):not(.task_view_more):not(.taskView):hover { color: var(--dbk-accent); }
+
+    // amounts / numeric columns
+    td.text-right,
+    th.text-right {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    td.dataTables_empty {
+        padding: 40px 16px;
+        text-align: center;
+        color: var(--dbk-text-muted);
+        font-size: var(--dbk-fs-sm);
+    }
+
+    // row checkboxes
+    input.select-table-row,
+    input#select-all-table,
+    input.select-all-table {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        accent-color: var(--dbk-accent);
+    }
+
+    // avatar + name cells (h5 > a, small text-muted company)
+    .media-body h5,
+    h5.mb-0 { font-size: var(--dbk-fs-sm); font-weight: 500; }
+
+    .text-lightest,
+    .media-body p { color: var(--dbk-text-muted); }
+}
+
+// hover row (table-hover / dataTable)
+.w-tables .table.table-hover tbody tr:hover,
+table.dataTable.table-hover tbody tr:hover { background-color: transparent; }
+
+.w-tables .table.table-hover tbody tr:hover > td,
+table.dataTable.table-hover tbody tr:hover > td { background-color: var(--dbk-surface-2); }
+
+table.dataTable tbody tr.selected > td { background-color: var(--dbk-accent-soft); }
+
+// sort arrows: quieter
+table.dataTable thead .sorting::before,
+table.dataTable thead .sorting::after,
+table.dataTable thead .sorting_asc::before,
+table.dataTable thead .sorting_asc::after,
+table.dataTable thead .sorting_desc::before,
+table.dataTable thead .sorting_desc::after {
+    opacity: .25;
+    font-size: 11px;
+    bottom: .85em !important;
+}
+
+table.dataTable thead .sorting_asc::before,
+table.dataTable thead .sorting_desc::after { opacity: .8; color: var(--dbk-accent); }
+
+// soft status pills inside lists, detail cards and modals (not the topbar counters)
+.w-tables .badge,
+.card-body .badge:not(.position-absolute),
+.modal-body .badge {
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: var(--dbk-fs-xs);
+    font-weight: 600;
+    line-height: 16px;
+    white-space: nowrap;
+    border: 0;
+}
+
+.w-tables .badge-primary:not([style]),
+.card-body .badge-primary:not(.position-absolute):not([style]),
+.modal-body .badge-primary:not([style]),
+.w-tables .badge-info:not([style]),
+.card-body .badge-info:not([style]),
+.modal-body .badge-info:not([style]) { background-color: var(--dbk-accent-soft) !important; color: var(--dbk-accent) !important; }
+
+.w-tables .badge-success:not([style]),
+.card-body .badge-success:not([style]),
+.modal-body .badge-success:not([style]) { background-color: var(--dbk-good-soft) !important; color: var(--dbk-good) !important; }
+
+.w-tables .badge-danger:not([style]),
+.card-body .badge-danger:not([style]),
+.modal-body .badge-danger:not([style]) { background-color: var(--dbk-bad-soft) !important; color: var(--dbk-bad) !important; }
+
+.w-tables .badge-warning:not([style]),
+.card-body .badge-warning:not([style]),
+.modal-body .badge-warning:not([style]) { background-color: var(--dbk-warning-soft) !important; color: var(--dbk-warning) !important; }
+
+.w-tables .badge-secondary:not([style]),
+.w-tables .badge-light:not([style]),
+.card-body .badge-secondary:not([style]),
+.card-body .badge-light:not([style]),
+.modal-body .badge-secondary:not([style]),
+.modal-body .badge-light:not([style]) { background-color: var(--dbk-neutral-soft) !important; color: var(--dbk-text-2) !important; }
+
+// status dot + text ("● Платено") — dot a bit smaller and aligned
+.w-tables td > .fa-circle.f-10,
+.w-tables td .fa-circle.f-10 {
+    font-size: 8px !important;
+    vertical-align: 1px;
+    margin-right: 6px !important;
+}
+
+// row actions "⋮" — 32 px ghost button
+.w-tables .task_view,
+.task_view {
+    border: 1px solid transparent;
+    border-radius: var(--dbk-radius-sm);
+    align-items: center;
+    vertical-align: middle;
+
+    .task_view_more {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: var(--dbk-radius-sm);
+        color: var(--dbk-text-muted);
+
+        &:hover,
+        &[aria-expanded="true"] { background-color: var(--dbk-neutral-soft); color: var(--dbk-text); }
+
+        &:focus-visible { outline: 0; box-shadow: var(--dbk-focus-ring); }
+    }
+
+    .taskView {
+        height: 32px;
+        line-height: 32px;
+        padding: 0 10px;
+        border-right: 1px solid var(--dbk-border);
+        color: var(--dbk-text-2);
+        font-size: var(--dbk-fs-sm);
+        border-radius: var(--dbk-radius-sm) 0 0 var(--dbk-radius-sm);
+
+        &:hover { background-color: var(--dbk-neutral-soft); color: var(--dbk-text); }
+    }
+
+    // "View | ⋮" pair keeps a light frame so it reads as one control
+    &:has(.taskView) { border-color: var(--dbk-border); }
+}
+
+// length / info / pagination row — dom: <'d-flex'<'flex-grow-1'l><i><p>>
+.dataTables_wrapper > .d-flex {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    padding: 8px 16px;
+    border-top: 1px solid var(--dbk-border);
+}
+
+.dataTables_wrapper .dataTables_length {
+    padding: 0;
+
+    label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: var(--dbk-fs-sm);
+        color: var(--dbk-text-muted);
+    }
+
+    select,
+    .bootstrap-select > .dropdown-toggle {
+        height: 32px;
+        min-height: 32px;
+        border: 1px solid var(--dbk-border-strong);
+        border-radius: var(--dbk-radius-sm);
+        background-color: var(--dbk-surface);
+        color: var(--dbk-text);
+        font-size: var(--dbk-fs-sm);
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+.dataTables_wrapper .dataTables_info {
+    padding: 0 !important;
+    font-size: var(--dbk-fs-sm);
+    color: var(--dbk-text-muted);
+    white-space: normal;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    margin: 0 !important;
+    padding: 0;
+
+    .pagination { margin: 4px 0; flex-wrap: wrap; gap: 4px; }
+}
+
+.dataTables_wrapper .pagination .page-link,
+.w-tables .pagination .page-link {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    margin: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--dbk-border) !important;
+    border-radius: var(--dbk-radius-sm) !important;
+    background-color: var(--dbk-surface);
+    color: var(--dbk-text-2);
+    font-size: var(--dbk-fs-sm);
+    box-shadow: none !important;
+
+    &:hover { background-color: var(--dbk-surface-2); color: var(--dbk-text); }
+}
+
+.dataTables_wrapper .pagination .page-item.active .page-link { color: #fff; }
+.dataTables_wrapper .pagination .page-item.disabled .page-link { color: var(--dbk-text-muted); opacity: .6; }
+
+.dataTables_wrapper .dataTables_processing {
+    background: var(--dbk-surface);
+    border: 1px solid var(--dbk-border);
+    border-radius: var(--dbk-radius-sm);
+    box-shadow: var(--dbk-shadow);
+    color: var(--dbk-text-2);
+    font-size: var(--dbk-fs-sm);
+}
+
+// quick actions bar (x-datatable.actions) above the list
+#quick-action-form #quick-actions {
+    gap: 8px;
+
+    .bootstrap-select > .dropdown-toggle,
+    select.form-control {
+        height: 36px;
+        border: 1px solid var(--dbk-border-strong);
+        border-radius: var(--dbk-radius-sm);
+        font-size: var(--dbk-fs-sm);
+    }
+}
+
+// ---------------------------------------------------------------- static tables (x-table) in show pages
+.card .table,
+.modal-body .table {
+    thead th {
+        background-color: var(--dbk-surface-2);
+        font-size: var(--dbk-fs-xs);
+        font-weight: 600;
+        color: var(--dbk-text-muted);
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--dbk-border);
+        box-shadow: none;
+    }
+
+    tbody td { padding: 10px 12px; box-shadow: 0 1px 0 0 var(--dbk-border); }
+    td.text-right, th.text-right { font-variant-numeric: tabular-nums; }
+}
+
+// ---------------------------------------------------------------- modals
+.modal-content {
+    border: 0;
+    border-radius: var(--dbk-radius-lg);
+    box-shadow: var(--dbk-shadow-lg);
+    background-color: var(--dbk-surface);
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--dbk-border);
+    border-radius: var(--dbk-radius-lg) var(--dbk-radius-lg) 0 0;
+    align-items: center;
+
+    .modal-title { font-size: 16px; font-weight: 600; color: var(--dbk-text); line-height: 24px; }
+
+    .close {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--dbk-radius-sm);
+        opacity: .6;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover { opacity: 1; background-color: var(--dbk-surface-2); }
+    }
+}
+
+.modal-body { padding: 20px; }
+
+.modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--dbk-border);
+    border-radius: 0 0 var(--dbk-radius-lg) var(--dbk-radius-lg);
+    gap: 8px;
+
+    > * { margin: 0; }
+}
+
+.modal-backdrop.show { opacity: .45; }
+
+// right side panel (x-right-modal)
+.task-detail-panel {
+    box-shadow: var(--dbk-shadow-lg);
+
+    #right-modal-title { font-size: var(--dbk-fs-xl); font-weight: 600; }
+}
+
+// select2 values/options: no forced Title Case (legacy custom.scss `text-transform: capitalize`) — names and
+// Bulgarian labels are shown as written
+.select2-container .select2-selection--single .select2-selection__rendered,
+.select2-results__option { text-transform: none; }
+
+// ---------------------------------------------------------------- show pages: tab bar + detail cards
+.tabs {
+    .-primary > li > a,
+    .nav .nav-item {
+        font-size: var(--dbk-fs-base);
+        color: var(--dbk-text-2);
+        white-space: nowrap;
+
+        &:hover { color: var(--dbk-text); }
+    }
+
+    .-primary > li > a.active,
+    .nav .nav-link.active { color: var(--dbk-text); font-weight: 600; }
+
+    // JS "More" toggle (priority-nav)
+    .-more > button {
+        background: transparent;
+        border: 0;
+        height: 100%;
+        min-height: 48px;
+        padding: 0 16px;
+        font-size: var(--dbk-fs-base);
+        color: var(--dbk-text-2);
+        white-space: nowrap;
+        cursor: pointer;
+
+        &:hover { color: var(--dbk-text); background-color: var(--dbk-surface-2); }
+    }
+
+    .-secondary {
+        border: 1px solid var(--dbk-border);
+        border-radius: 0 0 var(--dbk-radius-sm) var(--dbk-radius-sm);
+        box-shadow: var(--dbk-shadow) !important;
+    }
+}
+
+// detail cards (card + b-shadow-4 on show pages)
+.card.b-shadow-4 {
+    border: 1px solid var(--dbk-border) !important;
+    border-radius: var(--dbk-radius);
+    box-shadow: var(--dbk-shadow-sm) !important;
+
+    > .card-header {
+        background-color: transparent !important;
+        border-bottom: 1px solid var(--dbk-border);
+        padding: 14px 20px;
+        border-radius: var(--dbk-radius) var(--dbk-radius) 0 0;
+
+        .card-title,
+        h4, h3 { font-size: var(--dbk-fs-lg) !important; font-weight: 600 !important; color: var(--dbk-text); }
+    }
+
+    > .card-body { padding-left: 20px; padding-right: 20px; }
+}
+
+// create / edit forms (`div.add-client.bg-white.rounded` + h4 title + x-form-actions) — page and right panel alike:
+// one card look (border, radius, 15 px semibold title) instead of the legacy 21 px light heading
+.add-client.bg-white.rounded {
+    border: 1px solid var(--dbk-border);
+    border-radius: var(--dbk-radius) !important;
+    box-shadow: var(--dbk-shadow-sm);
+
+    > h4.border-bottom-grey {
+        padding: 16px 20px !important;
+        font-size: var(--dbk-fs-lg) !important;
+        line-height: 22px;
+        font-weight: 600 !important;
+        color: var(--dbk-text);
+        border-bottom: 1px solid var(--dbk-border) !important;
+    }
+
+    > .border-top-grey:last-child {
+        border-top-color: var(--dbk-border) !important;
+        border-radius: 0 0 var(--dbk-radius) var(--dbk-radius);
+    }
+}
+
+body.dark-theme .add-client.bg-white.rounded {
+    border-color: var(--dbk-border);
+    box-shadow: none;
+}
+
+// label / value rows inside detail cards (x-cards.data-row: p.text-lightest + p.text-dark-grey)
+.card-body .d-flex > p.text-lightest.f-14 { color: var(--dbk-text-muted); font-size: var(--dbk-fs-sm) !important; }
+
+// ---------------------------------------------------------------- page-level action row (create / export …)
+.content-wrapper > .d-grid > .btn,
+.content-wrapper .action-bar .btn { margin-bottom: 8px; }
+
+// ---------------------------------------------------------------- mobile
+@media (max-width: 767.98px) {
+    .dataTables_wrapper > .d-flex {
+        justify-content: center;
+        text-align: center;
+
+        > .flex-grow-1 { flex: 1 1 100%; display: flex; justify-content: center; }
+    }
+
+    .dataTables_wrapper .dataTables_paginate .pagination { justify-content: center; }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer { padding-left: 16px; padding-right: 16px; }
+}
+
+// (≤ 575 px the modals go full screen — _mobile.scss §6)
+
+// ---------------------------------------------------------------- dark theme (legacy dark-theme.scss uses !important)
+body.dark-theme {
+    .form-control,
+    .form-group .bootstrap-select > .dropdown-toggle,
+    .modal-body .bootstrap-select > .dropdown-toggle {
+        background-color: var(--dbk-bg) !important;
+        border-color: var(--dbk-border-strong) !important;
+    }
+
+    .form-control:focus { border-color: var(--dbk-accent) !important; }
+
+    .btn-secondary {
+        background-color: var(--dbk-surface) !important;
+        border-color: var(--dbk-border-strong) !important;
+        color: var(--dbk-text-2) !important;
+
+        &:hover { background-color: var(--dbk-surface-2) !important; color: var(--dbk-text) !important; }
+    }
+
+    .w-tables {
+        background-color: var(--dbk-surface) !important;
+        border-color: var(--dbk-border) !important;
+    }
+
+    .w-tables .table thead th,
+    table.dataTable.table thead th { background-color: var(--dbk-surface-2) !important; color: var(--dbk-text-muted) !important; }
+
+    .w-tables .table tbody td,
+    table.dataTable.table tbody td { box-shadow: 0 1px 0 0 var(--dbk-border); }
+
+    .w-tables .table.table-hover tbody tr:hover > td { background-color: var(--dbk-surface-2) !important; }
+
+    .task_view { border-color: transparent !important; }
+    .task_view:has(.taskView) { border-color: var(--dbk-border) !important; }
+    .task_view .task_view_more:hover { background-color: var(--dbk-neutral-soft) !important; }
+
+    .dataTables_wrapper .pagination .page-link {
+        background-color: var(--dbk-surface) !important;
+        border-color: var(--dbk-border) !important;
+        color: var(--dbk-text-2) !important;
+    }
+
+    .dataTables_wrapper .pagination .page-item.active .page-link {
+        background-color: var(--header_color) !important;
+        border-color: var(--header_color) !important;
+        color: #fff !important;
+    }
+
+    .modal-content { background-color: var(--dbk-surface) !important; }
+    .modal-header { border-bottom-color: var(--dbk-border) !important; }
+    .modal-body { border-bottom: 0 !important; }
+    .modal-footer { border-top-color: var(--dbk-border) !important; }
+
+    .card.b-shadow-4 { border-color: var(--dbk-border) !important; }
+}
+
+// dark: legacy primary is light (#D5D8DF) — keep it on hover instead of switching to the theme colour
+body.dark-theme .btn-primary:hover,
+body.dark-theme .btn-primary:focus {
+    background-color: #d5d8df !important;
+    border-color: #d5d8df !important;
+    color: #181c34 !important;
+}

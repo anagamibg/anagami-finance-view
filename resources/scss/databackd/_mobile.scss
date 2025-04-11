@@ -1,0 +1,355 @@
+// AFV UI package partial: mobile & accessibility (S9 / P10).
+// Imported last in main.scss → wins on equal specificity. Cross-cutting rules only (AFV globals,
+// Bootstrap utilities, topbar/table/pagination tap targets); page-specific fixes live in the owning package.
+// See docs/mvp/phase2/ui-guidelines.md §11.
+
+// ================================================================ 1. focus (all widths)
+// AFV resets `:focus { outline: none !important }` and `.btn:focus { box-shadow: none }`, so keyboard users
+// get no focus indicator. The 25 % ring alone is ~1.5:1 against white, so pair it with a 2 px accent outline
+// (≥ 3:1 on surface and bg, light and dark) — only on :focus-visible, mouse clicks stay unchanged.
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+.btn:focus-visible,
+.dropdown-item:focus-visible,
+.page-link:focus-visible,
+.nav-link:focus-visible,
+.form-control:focus-visible,
+.custom-select:focus-visible,
+.bootstrap-select > .dropdown-toggle:focus-visible {
+    outline: 2px solid var(--dbk-accent) !important;
+    outline-offset: 1px;
+    box-shadow: var(--dbk-focus-ring) !important;
+}
+
+// Checkboxes/radios: AFV hides some native inputs and styles the label; keep the outline on the input
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+    outline-offset: 2px;
+    box-shadow: none !important;
+}
+
+// bootstrap-select: the real focusable is the toggle button; the inner search box keeps the input style
+.bootstrap-select .bs-searchbox .form-control:focus-visible { outline-offset: -2px; }
+
+// Dark/coloured sidebar: an accent outline on the sidebar background is not visible enough → use the text colour
+.sidebar-menu a:focus-visible,
+.sidebar-menu button:focus-visible,
+.sidebar-menu [tabindex]:focus-visible,
+.sidebar-brand-box:focus-visible,
+.sidebarTogglerBox :focus-visible {
+    outline: 2px solid currentColor !important;
+    outline-offset: -2px;
+    box-shadow: none !important;
+}
+
+// Skip-to-content style helpers stay visible when focused
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-visible { outline-offset: 2px; }
+
+// Focus not obscured (WCAG 2.4.11): keep scrolled-to / focused targets below the sticky topbar (+ the sticky filter bar
+// on desktop). layouts/app measures both into --dbk-sticky-top and also corrects sequential focus moves.
+html { scroll-padding-top: var(--dbk-sticky-top, 76px); }
+
+// ================================================================ 2. contrast (all widths, WCAG AA)
+// AFV's $light_text #99A5B5 is 2.5:1 on white (2.3:1 on the page bg). It is used for meaningful text
+// (table headers, hints, breadcrumbs, captions, empty states) → raise to the muted token (4.96:1 / 4.5:1).
+.text-lightest { color: var(--dbk-text-muted); }
+
+.table thead th { color: var(--dbk-text-muted); }
+
+.form-control::placeholder,
+.form-control::-webkit-input-placeholder,
+input::placeholder,
+textarea::placeholder { color: var(--dbk-text-muted); opacity: 1; }
+
+// bootstrap-select placeholder (#999 → 2.85:1)
+.bootstrap-select > .dropdown-toggle.bs-placeholder,
+.bootstrap-select > .dropdown-toggle.bs-placeholder:hover,
+.bootstrap-select > .dropdown-toggle.bs-placeholder:focus,
+.bootstrap-select > .dropdown-toggle.bs-placeholder:active { color: var(--dbk-text-muted); }
+
+// Table row "more" (⋯) toggle and list/board view switch icons: icons need ≥ 3:1
+.task_view .task_view_more,
+.task_view .taskView { color: var(--dbk-text-muted); }
+
+// "Cancel" buttons (#99A5B5 text on white)
+.btn-cancel:not(:hover):not(:disabled):not(.disabled) { color: var(--dbk-text-muted) !important; }
+
+// Bootstrap text utilities that fail on white: success #28a745 (3.1:1), warning #ffc107 (1.6:1), info #17a2b8 (3.0:1)
+.text-success { color: var(--dbk-good) !important; }
+.text-warning { color: var(--dbk-warning) !important; }
+.text-info { color: var(--dbk-accent) !important; }
+
+// AFV's red (#d30000) is 3.0:1 on the dark-theme background
+body.dark-theme .text-danger { color: var(--dbk-bad) !important; }
+
+// White text on mid-tone Bootstrap fills (badge-success 3.1:1, badge-info 3.0:1, bg-warning 1.7:1) → dark text.
+// --dbk-tooltip-bg is near-black in both themes, and these fills don't change with the theme.
+.badge-success,
+.badge-info,
+.badge-warning,
+.progress-bar.bg-warning,
+.progress-bar.bg-info,
+.progress-bar.bg-success { color: var(--dbk-tooltip-bg); }
+
+// ================================================================ 3. reduced motion (all widths)
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+// ================================================================ 4. tablet & phone (≤ 991.98 px)
+@media (max-width: 991.98px) {
+    // Nothing may scroll the whole page sideways: wide content scrolls inside its own wrapper.
+    // `clip` (not `hidden`) does not create a scroll container, so position: sticky keeps working.
+    .main-container { overflow-x: clip; }
+
+    .content-wrapper {
+        min-width: 0;
+        overflow-wrap: break-word;
+
+        img,
+        video,
+        iframe { max-width: 100%; }
+
+        img { height: auto; }
+
+        // Grid/flex children default to min-width:auto and push the row wider than the screen
+        .row > [class*="col"],
+        .d-flex > .flex-grow-1,
+        .d-flex > .w-100 { min-width: 0; }
+    }
+
+    // Plain Bootstrap / DataTables tables that are not already in a scroll wrapper
+    .table-responsive,
+    .dataTables_wrapper .table-responsive,
+    .dbk-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dataTables_wrapper .row { margin-left: 0; margin-right: 0; }
+}
+
+// ================================================================ 5. phone (≤ 767.98 px): tap targets ≥ 40×40
+@media (max-width: 767.98px) {
+    // ---- topbar icons
+    .main-header .header-icon-box {
+        min-width: 40px;
+        min-height: 40px;
+        margin-right: 2px;
+        display: flex !important; // the markup carries .d-block (display: block !important)
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main-header .logout_box .header-icon-box { margin-right: 0; }
+
+    // counter badge: keep it on the icon's top-right corner inside the larger box (legacy: left 10px / top -7px)
+    .main-header .header-icon-box .active-timer-count {
+        left: 22px;
+        top: 5px;
+    }
+
+    // the icon list keeps the reboot `ul { margin-bottom: 1rem }` → icons sit above the hamburger
+    .main-header .page-header-right > ul {
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    // (the hamburger's 40×40 target is set by P1 in _sidebar.scss)
+
+    // ---- buttons
+    .btn { min-height: 40px; }
+
+    .btn-sm,
+    .btn-group-sm > .btn {
+        min-height: 40px;
+        padding-top: 9px;
+        padding-bottom: 9px;
+    }
+
+    // icon-only buttons get a square target (text buttons are wider anyway)
+    .btn,
+    .btn-sm { min-width: 40px; }
+
+    .btn-link { min-height: 40px; }
+
+    // ---- form controls: small variants (DataTables search "p-1" 31 px, length select 32 px, date inputs 25 px).
+    // Regular fields stay at the guideline height (38 px, §8).
+    .form-control-sm,
+    .custom-select-sm,
+    .input-group-sm > .form-control,
+    #search-text-field { min-height: 40px; }
+
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_length .bootstrap-select > .dropdown-toggle {
+        height: 40px;
+        min-height: 40px;
+    }
+
+    textarea.form-control { min-height: 80px; }
+
+    // native checkboxes/radios (row selection 13 px) → 20 px box; the table cell adds the rest of the target
+    input[type="checkbox"]:not(.custom-control-input),
+    input[type="radio"]:not(.custom-control-input),
+    .w-tables input.select-table-row,
+    .w-tables input#select-all-table,
+    .w-tables input.select-all-table {
+        width: 20px;
+        height: 20px;
+    }
+
+    .custom-control-label::before,
+    .custom-control-label::after {
+        width: 20px;
+        height: 20px;
+    }
+
+    // ---- menus, tabs, pagination
+    .dropdown-item {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .nav-tabs .nav-link,
+    .nav-pills .nav-link {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+    }
+
+    .pagination li a,
+    .pagination .page-link,
+    .dataTables_wrapper .pagination .page-link,
+    .w-tables .pagination .page-link {
+        min-width: 40px;
+        height: 40px;
+    }
+
+    // segmented control (quick periods, chart type, mode switch) 30 px → 40 px buttons
+    .dbk-segmented > a,
+    .dbk-segmented > button,
+    .dbk-segmented > label {
+        min-height: 40px;
+        padding-top: 11px;
+        padding-bottom: 11px;
+    }
+
+    .pagination li { margin-right: 4px; }
+
+    .pagination,
+    .dataTables_paginate .pagination {
+        flex-wrap: wrap;
+        row-gap: 4px;
+    }
+
+    // DataTables footer: info + pagination stacked and centred instead of overflowing side by side
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        float: none;
+        text-align: center;
+        padding-left: 0;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .pagination { justify-content: center; }
+
+    // table row action toggle (⋯) 38×30 → 40×40
+    .task_view .task_view_more,
+    .task_view .taskView,
+    .w-tables .task_view .task_view_more,
+    .w-tables .task_view .taskView {
+        min-width: 40px;
+        height: 40px;
+        line-height: 40px;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    // close (×) buttons in modals, alerts, side panels
+    .close,
+    .close-task-detail {
+        min-width: 40px;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+// ================================================================ 6. small phone (≤ 575.98 px): modals full screen
+// Form modals use the whole screen: title bar and action bar stay visible (sticky) while the body scrolls with the
+// .modal container. Small confirmations (bootbox, .modal-sm) stay centred cards.
+@media (max-width: 575.98px) {
+    .modal:not(.bootbox) .modal-dialog:not(.modal-sm) {
+        margin: 0;
+        max-width: none;
+        width: 100%;
+        min-height: 100%;
+        align-items: stretch !important; // the markup carries .align-items-center
+
+        > .modal-content {
+            min-height: 100vh;
+            min-height: 100dvh;
+            border: 0;
+            border-radius: 0;
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            border-radius: 0;
+            background-color: var(--dbk-surface);
+        }
+
+        .modal-footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 3;
+            margin-top: auto;
+            border-radius: 0;
+            background-color: var(--dbk-surface);
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .modal-header .close {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    .modal-sm,
+    .bootbox .modal-dialog {
+        margin: 16px;
+        max-width: none;
+    }
+
+    .modal-body { overflow-wrap: break-word; }
+
+    .modal-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+
+        > * { margin: 0; }
+        > .btn { flex: 1 1 auto; }
+    }
+
+    // keep the last element of a page clear of fixed bottom bars and the iOS home indicator
+    .content-wrapper { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+}

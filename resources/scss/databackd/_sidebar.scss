@@ -1,0 +1,879 @@
+// AFV UI package partial: sidebar (S9 / P1). Owned by one package agent; compiled by S9.
+// Sidebar + topbar: grouped menu (sections / financial-analysis subgroups), clear active states,
+// collapsed rail with tooltips + flyouts, brand box without cut names, usable mobile drawer.
+// S12: the financial-analysis menu = direct links + collapsible groups (li.dbk-sb-group, remembered), menu filter (.dbk-sb-filter).
+// Markup: resources/views/sections/{sidebar,menu,topbar}.blade.php, components/{menu-item,sub-menu-item}.blade.php
+// Legacy rules live in resources/scss/sidebar.scss (not edited) - the selectors below are more specific on purpose.
+
+// ---------------------------------------------------------------- colours per sidebar theme
+// Dark sidebar (company theme "dark") and the user dark theme (aside has no theme class there).
+.main-sidebar {
+    --dbk-sb-text: rgba(255, 255, 255, 0.74);
+    --dbk-sb-text-strong: #ffffff;
+    --dbk-sb-icon: rgba(255, 255, 255, 0.62);
+    --dbk-sb-group: var(--dbk-sidebar-group);
+    --dbk-sb-divider: var(--dbk-sidebar-divider);
+    --dbk-sb-hover-bg: var(--dbk-sidebar-hover-bg);
+    --dbk-sb-active-bg: var(--dbk-sidebar-active-bg);
+    --dbk-sb-sub-active-bg: rgba(255, 255, 255, 0.05);
+    --dbk-sb-accent: var(--dbk-accent);
+    --dbk-sb-flyout-bg: var(--dbk-tooltip-bg);
+    --dbk-sb-flyout-border: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-light .main-sidebar {
+    --dbk-sb-text: var(--dbk-text-2);
+    --dbk-sb-text-strong: var(--dbk-text);
+    --dbk-sb-icon: var(--dbk-text-muted);
+    --dbk-sb-group: var(--dbk-text-muted);
+    --dbk-sb-divider: var(--dbk-border);
+    --dbk-sb-hover-bg: var(--dbk-surface-2);
+    --dbk-sb-active-bg: var(--dbk-accent-soft);
+    --dbk-sb-sub-active-bg: var(--dbk-surface-2);
+    --dbk-sb-accent: var(--dbk-accent);
+    --dbk-sb-flyout-bg: var(--dbk-surface);
+    --dbk-sb-flyout-border: var(--dbk-border);
+}
+
+// ---------------------------------------------------------------- layout: brand / menu as a column
+@media (min-width: 992px) {
+    .main-sidebar {
+        display: flex;
+        flex-direction: column;
+        bottom: 48px; // the toggler box (fixed, 48 px) sits below the menu instead of covering its last items
+    }
+}
+
+@media (max-width: 991.98px) {
+    .main-sidebar {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.main-sidebar .sidebar-brand-box {
+    flex: 0 0 auto;
+}
+
+.main-sidebar .sidebar-menu {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+    padding: var(--dbk-space-2) 0 var(--dbk-space-4);
+    overscroll-behavior: contain;
+}
+
+// ---------------------------------------------------------------- menu scrollbar
+// Standard properties (Chrome 121+, Firefox): once scrollbar-width is set Chrome ignores the legacy
+// ::-webkit-scrollbar rules (sidebar.scss / dark-theme.scss), so without scrollbar-color the native light
+// track showed on the dark menu. Thin, transparent track, thumb in the sidebar's text colour; on pointer
+// devices the thumb shows only while the pointer or focus is in the menu. The gutter is reserved so items
+// don't jump when an opened group makes the menu scrollable.
+.main-sidebar {
+    --dbk-sb-scroll-thumb: rgba(255, 255, 255, 0.18);
+    --dbk-sb-scroll-thumb-hover: rgba(255, 255, 255, 0.32);
+}
+
+.sidebar-light .main-sidebar {
+    --dbk-sb-scroll-thumb: rgba(16, 24, 40, 0.18);
+    --dbk-sb-scroll-thumb-hover: rgba(16, 24, 40, 0.32);
+}
+
+.main-sidebar .sidebar-menu {
+    scrollbar-width: thin;
+    scrollbar-color: var(--dbk-sb-scroll-thumb) transparent;
+    scrollbar-gutter: stable;
+}
+
+@media (hover: hover) {
+    .main-sidebar .sidebar-menu {
+        scrollbar-color: transparent transparent;
+        transition: scrollbar-color 0.2s ease;
+    }
+
+    .main-sidebar .sidebar-menu:hover,
+    .main-sidebar .sidebar-menu:focus-within {
+        scrollbar-color: var(--dbk-sb-scroll-thumb) transparent;
+    }
+}
+
+// Safari (no scrollbar-color): the same look through the WebKit pseudo-elements
+@supports not (scrollbar-color: auto) {
+    .main-sidebar .sidebar-menu {
+        scrollbar-width: auto;
+    }
+
+    body .main-sidebar .sidebar-menu::-webkit-scrollbar {
+        width: 8px;
+        background: transparent;
+    }
+
+    body .main-sidebar .sidebar-menu::-webkit-scrollbar-thumb {
+        border: 2px solid transparent;
+        border-radius: 8px;
+        background-color: var(--dbk-sb-scroll-thumb);
+        background-clip: padding-box;
+
+        &:hover {
+            background-color: var(--dbk-sb-scroll-thumb-hover);
+        }
+    }
+}
+
+// ---------------------------------------------------------------- brand box (company + user name)
+.main-sidebar .sidebar-brand-box .sidebar-brand {
+    min-height: 64px;
+    padding: 10px 16px 10px 20px;
+    gap: var(--dbk-space-3);
+}
+
+.main-sidebar .sidebar-brand-box .sidebar-brand-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    overflow: visible;
+
+    h1.dbk-sb-company {
+        display: flex;
+        align-items: flex-start;
+        width: auto;
+        white-space: normal;
+        overflow: visible;
+        font-size: 15px !important;
+        line-height: 19px;
+        font-weight: 600 !important;
+
+        .icon-arrow-down {
+            flex: 0 0 auto;
+            font-size: 10px;
+            line-height: 19px;
+            padding-left: 6px !important;
+            opacity: 0.7;
+        }
+    }
+
+    // company name: up to 2 lines, broken between words; the full name is in the tooltip
+    .dbk-sb-company-name {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        overflow-wrap: normal;
+        word-break: normal;
+        hyphens: none;
+    }
+
+    .pro-name {
+        display: flex;
+        align-items: center;
+        margin-top: 4px;
+
+        span.bg-light-green {
+            position: static !important;
+            flex: 0 0 8px;
+            width: 8px;
+            height: 8px;
+            margin-right: 6px;
+        }
+
+        p.dbk-sb-user {
+            min-width: 0;
+            width: auto;
+            padding-left: 0 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 18px;
+        }
+    }
+}
+
+.main-sidebar .sidebar-brand-box .sidebar-brand-logo {
+    flex: 0 0 32px;
+    max-width: 32px;
+
+    img {
+        max-width: 32px;
+        max-height: 32px;
+    }
+}
+
+// no hairline under every item (legacy custom.scss) - groups are separated by section titles instead
+.main-sidebar .sidebar-menu li,
+.sidebar-light .main-sidebar .sidebar-menu li {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+// ---------------------------------------------------------------- section titles (Analysis / Operations / Administration)
+.main-sidebar .sidebar-menu li.dbk-sb-section {
+    margin: var(--dbk-space-3) 0 0;
+    padding: var(--dbk-space-3) 24px var(--dbk-space-1);
+    border-top: 1px solid var(--dbk-sb-divider);
+    color: var(--dbk-sb-group);
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    user-select: none;
+
+    &:first-child {
+        margin-top: 0;
+        padding-top: var(--dbk-space-2);
+        border-top: 0;
+    }
+}
+
+// ---------------------------------------------------------------- top-level items
+.main-sidebar .sidebar-menu li > a.nav-item,
+.main-sidebar .sidebar-menu li > button.nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: auto;
+    min-height: 40px;
+    margin: 2px var(--dbk-space-2);
+    padding: 8px 32px 8px 14px;
+    border-radius: var(--dbk-radius-sm);
+    color: var(--dbk-sb-text);
+    font-size: 14px !important;
+    line-height: 20px;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    > svg {
+        flex: 0 0 16px;
+        width: 16px;
+        height: 16px;
+        color: var(--dbk-sb-icon);
+        transition: color 0.15s ease;
+    }
+
+    > .dbk-sb-label,
+    > span.pl-3:not(.badge) {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding-left: 12px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .menu-item-count {
+        flex: 0 0 auto;
+        margin-left: var(--dbk-space-2);
+    }
+
+    &:hover {
+        background-color: var(--dbk-sb-hover-bg);
+        color: var(--dbk-sb-text-strong) !important;
+
+        > svg {
+            color: var(--dbk-sb-text-strong);
+        }
+    }
+
+    &:focus {
+        outline: 0;
+    }
+
+    &:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 2px var(--dbk-sb-accent);
+    }
+}
+
+// group chevron (legacy ::after) - centred vertically in the taller row
+.main-sidebar .accordionItem.openIt > .accordionItemHeading::after,
+.main-sidebar .accordionItem.closeIt > .accordionItemHeading::after {
+    top: 50%;
+    right: 12px;
+    line-height: 1;
+    transform: translateY(-50%);
+    opacity: 0.7;
+}
+
+// direct links have no chevron - their label may use the space on the right
+.main-sidebar .sidebar-menu li > a.nav-item:not(.accordionItemHeading) {
+    padding-right: 12px;
+}
+
+// ---------------------------------------------------------------- AFV groups (S12)
+// li.dbk-sb-group > button.dbk-sb-group-toggle[aria-expanded] + div.dbk-sb-group-items; .is-open is set by the
+// server (group of the current page) and by the inline script in sections/menu.blade.php (remembered state).
+.main-sidebar .sidebar-menu li > button.dbk-sb-group-toggle {
+    width: calc(100% - 2 * var(--dbk-space-2));
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    font-weight: 400;
+    text-align: left;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+
+    // chevron: same glyphs as the legacy accordion (simple-line-icons)
+    &::after {
+        content: "\E606";
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        font-family: 'simple-line-icons';
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1;
+        opacity: 0.7;
+        transform: translateY(-50%);
+    }
+}
+
+.main-sidebar .sidebar-menu li.dbk-sb-group.is-open > button.dbk-sb-group-toggle::after {
+    content: "\E604";
+}
+
+.main-sidebar .sidebar-menu li.dbk-sb-group > .dbk-sb-group-items {
+    display: none;
+    padding: 2px 0 var(--dbk-space-2);
+    white-space: normal;
+}
+
+.main-sidebar .sidebar-menu li.dbk-sb-group.is-open > .dbk-sb-group-items {
+    display: block;
+}
+
+// active item: background + 3 px accent bar + strong text
+.main-sidebar .sidebar-menu li > a.nav-item.active,
+.main-sidebar .sidebar-menu li > button.nav-item.active,
+.sidebar-light .main-sidebar .sidebar-menu li > a.nav-item.active,
+.sidebar-light .main-sidebar .sidebar-menu li > button.nav-item.active {
+    background-color: var(--dbk-sb-active-bg);
+    color: var(--dbk-sb-text-strong) !important;
+    font-weight: 600;
+
+    > svg {
+        color: var(--dbk-sb-accent);
+    }
+
+    &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 3px;
+        border-radius: 0 3px 3px 0;
+        background-color: var(--dbk-sb-accent);
+    }
+}
+
+// ---------------------------------------------------------------- sub-items
+.main-sidebar .openIt .accordionItemContent {
+    padding: 2px 0 var(--dbk-space-2);
+}
+
+.main-sidebar .sidebar-menu li .accordionItemContent a,
+.main-sidebar .sidebar-menu li .dbk-sb-group-items a {
+    position: relative;
+    display: block;
+    margin: 1px var(--dbk-space-2) 1px 30px;
+    padding: 7px 12px 7px 20px;
+    border-radius: var(--dbk-radius-sm);
+    color: var(--dbk-sb-text);
+    font-size: 13.5px !important;
+    line-height: 18px;
+    white-space: normal; // long names wrap instead of being cut
+    overflow-wrap: anywhere;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+        background-color: var(--dbk-sb-hover-bg);
+        color: var(--dbk-sb-text-strong) !important;
+    }
+
+    &:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 2px var(--dbk-sb-accent);
+    }
+
+    // active sub-item: strong text + accent dot
+    &.active {
+        background-color: var(--dbk-sb-sub-active-bg);
+        color: var(--dbk-sb-text-strong) !important;
+        font-weight: 600;
+
+        &::before {
+            content: "";
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            width: 6px;
+            height: 6px;
+            margin-top: -3px;
+            border-radius: 50%;
+            background-color: var(--dbk-sb-accent);
+        }
+    }
+}
+
+.sidebar-light .main-sidebar .sidebar-menu li .accordionItemContent a.active,
+.sidebar-light .main-sidebar .sidebar-menu li .dbk-sb-group-items a.active {
+    color: var(--dbk-sb-text-strong) !important;
+}
+
+// small subtitles inside a group (e.g. "Settings" in "Data")
+.main-sidebar .accordionItemContent .dbk-sb-group-title,
+.main-sidebar .dbk-sb-group-items .dbk-sb-group-title {
+    margin: var(--dbk-space-3) var(--dbk-space-2) 2px 30px;
+    padding: 0 12px 0 20px;
+    color: var(--dbk-sb-group);
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+
+    &:first-child {
+        margin-top: var(--dbk-space-1);
+    }
+}
+
+// flyout title (only shown in the collapsed rail)
+.main-sidebar .accordionItemContent[data-dbk-title]::before,
+.main-sidebar .dbk-sb-group-items[data-dbk-title]::before {
+    display: none;
+}
+
+// RTL: chevron and accent bar on the other side
+.rtl .main-sidebar .accordionItem.openIt > .accordionItemHeading::after,
+.rtl .main-sidebar .accordionItem.closeIt > .accordionItemHeading::after,
+.rtl .main-sidebar .sidebar-menu li > button.dbk-sb-group-toggle::after {
+    right: auto;
+    left: 12px;
+}
+
+.rtl .main-sidebar .sidebar-menu li > button.dbk-sb-group-toggle {
+    text-align: right;
+}
+
+.rtl .main-sidebar .sidebar-menu li > a.nav-item,
+.rtl .main-sidebar .sidebar-menu li > button.nav-item {
+    padding: 8px 14px 8px 32px;
+
+    &.active::before {
+        left: auto;
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+}
+
+// ---------------------------------------------------------------- menu filter (S12)
+.main-sidebar .dbk-sb-filter {
+    --dbk-sb-filter-bg: rgba(255, 255, 255, 0.07);
+    --dbk-sb-filter-border: rgba(255, 255, 255, 0.12);
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    margin: var(--dbk-space-3) var(--dbk-space-2) var(--dbk-space-1);
+    color: var(--dbk-sb-icon);
+
+    .dbk-sb-filter-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        margin-top: -7px;
+        pointer-events: none;
+    }
+
+    .dbk-sb-filter-input {
+        width: 100%;
+        height: 36px;
+        padding: 0 58px 0 34px;
+        border: 1px solid var(--dbk-sb-filter-border);
+        border-radius: var(--dbk-radius-sm);
+        background-color: var(--dbk-sb-filter-bg);
+        color: var(--dbk-sb-text-strong);
+        font-size: 13.5px;
+        line-height: 20px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+        &::placeholder {
+            color: var(--dbk-sb-icon);
+            opacity: 1;
+        }
+
+        &:focus {
+            outline: 0;
+            border-color: var(--dbk-sb-accent);
+            box-shadow: 0 0 0 2px var(--dbk-sb-accent);
+        }
+    }
+
+    .dbk-sb-filter-kbd {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 1px 6px;
+        border: 1px solid var(--dbk-sb-filter-border);
+        border-radius: 4px;
+        background: transparent;
+        box-shadow: none;
+        color: var(--dbk-sb-icon);
+        font-family: inherit;
+        font-size: 11px;
+        line-height: 16px;
+        pointer-events: none;
+    }
+
+    // the hint disappears while typing; the clear button takes its place
+    .dbk-sb-filter-input:focus ~ .dbk-sb-filter-kbd,
+    .dbk-sb-filter-clear:not([hidden]) ~ .dbk-sb-filter-kbd,
+    .dbk-sb-filter-input:not(:placeholder-shown) ~ .dbk-sb-filter-kbd {
+        display: none;
+    }
+
+    .dbk-sb-filter-clear {
+        position: absolute;
+        right: 2px;
+        top: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        margin-top: -16px;
+        padding: 0;
+        border: 0;
+        border-radius: var(--dbk-radius-sm);
+        background: transparent;
+        color: var(--dbk-sb-icon);
+        cursor: pointer;
+
+        &[hidden] {
+            display: none;
+        }
+
+        &:hover {
+            color: var(--dbk-sb-text-strong);
+        }
+
+        &:focus-visible {
+            outline: 0;
+            box-shadow: 0 0 0 2px var(--dbk-sb-accent);
+        }
+    }
+}
+
+.sidebar-light .main-sidebar .dbk-sb-filter {
+    --dbk-sb-filter-bg: var(--dbk-surface-2);
+    --dbk-sb-filter-border: var(--dbk-border);
+}
+
+.main-sidebar .sidebar-menu .dbk-sb-filter-empty {
+    margin: var(--dbk-space-3) 24px;
+    color: var(--dbk-sb-group);
+    font-size: 13px;
+    line-height: 18px;
+    white-space: normal;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// filtering: hidden entries (attribute - the legacy <li> classes must stay untouched) and force-opened groups
+.main-sidebar .sidebar-menu [data-dbk-hidden] {
+    display: none !important;
+}
+
+.main-sidebar .sidebar-menu.dbk-sb-filtering li[data-dbk-filter-open] > .accordionItemContent,
+.main-sidebar .sidebar-menu.dbk-sb-filtering li[data-dbk-filter-open] > .dbk-sb-group-items {
+    display: block !important;
+    float: none;
+    height: auto;
+    transform: none;
+}
+
+// a group opened by the filter shows the "open" chevron
+.main-sidebar .sidebar-menu.dbk-sb-filtering li[data-dbk-filter-open] > .accordionItemHeading::after,
+.main-sidebar .sidebar-menu.dbk-sb-filtering li[data-dbk-filter-open] > button.dbk-sb-group-toggle::after {
+    content: "\E604";
+}
+
+// ---------------------------------------------------------------- toggler box
+.sidebarTogglerBox #sidebarToggle {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dbk-radius-sm);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+        background-color: var(--dbk-sidebar-hover-bg) !important;
+    }
+
+    &:focus-visible {
+        outline: 0;
+        box-shadow: var(--dbk-focus-ring);
+    }
+}
+
+.sidebar-light .sidebarTogglerBox #sidebarToggle:hover {
+    background-color: var(--dbk-surface-2) !important;
+}
+
+// ---------------------------------------------------------------- collapsed rail (desktop)
+// No hover-expand any more: icons only, a tooltip for plain links, a flyout with the sub-items for groups.
+@media (min-width: 992px) {
+    body.sidebar-toggled .main-sidebar:hover,
+    body.sidebar-toggled .main-sidebar:hover ~ .sidebarTogglerBox {
+        width: 3.77rem !important;
+    }
+
+    body.sidebar-toggled .main-sidebar:hover .sidebar-brand {
+        padding: 14px;
+    }
+
+    body.sidebar-toggled .main-sidebar .sidebar-brand-name,
+    body.sidebar-toggled .main-sidebar:hover .sidebar-brand-name,
+    body.sidebar-toggled .main-sidebar:hover .nav-item span,
+    body.sidebar-toggled .main-sidebar:hover ~ .sidebarTogglerBox p,
+    body.sidebar-toggled .main-sidebar:hover .accordionItemContent,
+    body.sidebar-toggled .main-sidebar .accordionItem > .accordionItemHeading::after {
+        display: none !important;
+    }
+
+    body.sidebar-toggled .sidebarTogglerBox .mobile-app-btn {
+        display: none !important;
+    }
+
+    body.sidebar-toggled .main-sidebar .sidebar-brand-box .sidebar-brand {
+        justify-content: center !important;
+        padding: 14px 0;
+    }
+
+    // the 60 px rail has no room for a scrollbar gutter (icons would sit off-centre); it still scrolls by wheel/touch
+    body.sidebar-toggled .main-sidebar .sidebar-menu {
+        overflow-x: hidden;
+        scrollbar-width: none;
+        scrollbar-gutter: auto;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    body.sidebar-toggled .main-sidebar .sidebar-menu li.dbk-sb-section {
+        height: 1px;
+        margin: var(--dbk-space-2) 12px;
+        padding: 0;
+        border-top: 0;
+        background-color: var(--dbk-sb-divider);
+
+        span {
+            display: none;
+        }
+
+        &:first-child {
+            height: 0;
+            margin-top: 0;
+        }
+    }
+
+    body.sidebar-toggled .main-sidebar .dbk-sb-filter,
+    body.sidebar-toggled .main-sidebar .sidebar-menu li > button.dbk-sb-group-toggle::after {
+        display: none !important;
+    }
+
+    body.sidebar-toggled .main-sidebar .sidebar-menu li.dbk-sb-group > .dbk-sb-group-items {
+        display: none;
+    }
+
+    body.sidebar-toggled .main-sidebar .sidebar-menu li > a.nav-item,
+    body.sidebar-toggled .main-sidebar .sidebar-menu li > button.nav-item {
+        justify-content: center;
+        min-height: 40px;
+        margin: 2px 8px;
+        padding: 8px 0;
+    }
+
+    // flyout with the group's sub-items, positioned (top) by the sidebar script
+    body.sidebar-toggled .main-sidebar .accordionItem:hover > .accordionItemContent,
+    body.sidebar-toggled .main-sidebar .accordionItem:focus-within > .accordionItemContent,
+    body.sidebar-toggled .main-sidebar .sidebar-menu li.dbk-sb-group:hover > .dbk-sb-group-items,
+    body.sidebar-toggled .main-sidebar .sidebar-menu li.dbk-sb-group:focus-within > .dbk-sb-group-items {
+        display: block !important;
+        position: fixed;
+        left: calc(3.77rem - 4px);
+        top: var(--dbk-flyout-top, 64px);
+        z-index: 1050;
+        width: 260px;
+        height: auto;
+        max-height: var(--dbk-flyout-max, calc(100vh - 16px));
+        overflow-y: auto;
+        float: none;
+        transform: none;
+        margin: 0;
+        padding: var(--dbk-space-2) 0;
+        border: 1px solid var(--dbk-sb-flyout-border);
+        border-radius: var(--dbk-radius);
+        background-color: var(--dbk-sb-flyout-bg);
+        box-shadow: var(--dbk-shadow-lg);
+        white-space: normal;
+
+        a {
+            margin: 1px var(--dbk-space-2);
+        }
+
+        .dbk-sb-group-title {
+            margin-left: var(--dbk-space-2);
+        }
+    }
+
+    body.sidebar-toggled .main-sidebar .accordionItemContent[data-dbk-title]::before,
+    body.sidebar-toggled .main-sidebar .dbk-sb-group-items[data-dbk-title]::before {
+        content: attr(data-dbk-title);
+        display: block;
+        padding: 4px 20px 8px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid var(--dbk-sb-flyout-border);
+        color: var(--dbk-sb-text-strong);
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 600;
+    }
+}
+
+// tooltips of the collapsed rail sit above the sidebar
+.tooltip.dbk-sb-tooltip {
+    z-index: 1060;
+}
+
+// ---------------------------------------------------------------- mobile drawer (< 992 px)
+@media (max-width: 991.98px) {
+    .main-sidebar {
+        width: min(300px, 86vw);
+        transform: translate3d(-110%, 0, 0);
+        box-shadow: none;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .main-sidebar.toggled {
+        transform: translate3d(0, 0, 0);
+        box-shadow: var(--dbk-shadow-lg);
+    }
+
+    // dim the whole page behind the drawer; tapping it closes the menu
+    .mobile-close-sidebar-panel.toggled {
+        left: 0 !important;
+        width: 100% !important;
+        background-color: rgba(16, 24, 40, 0.5) !important;
+        z-index: 9998 !important;
+    }
+
+    .main-sidebar .sidebar-menu li > a.nav-item,
+    .main-sidebar .sidebar-menu li > button.nav-item {
+        min-height: 44px;
+        font-size: 15px !important;
+    }
+
+    .main-sidebar .sidebar-menu li .accordionItemContent a,
+    .main-sidebar .sidebar-menu li .dbk-sb-group-items a {
+        min-height: 40px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        font-size: 14px !important;
+    }
+
+    .main-sidebar .sidebar-brand-box .sidebar-brand {
+        min-height: 64px;
+    }
+
+    // 16 px: iOS does not zoom into the field; no keyboard-shortcut hint on touch screens
+    .main-sidebar .dbk-sb-filter .dbk-sb-filter-input {
+        height: 40px;
+        padding-right: 40px;
+        font-size: 16px;
+    }
+
+    .main-sidebar .dbk-sb-filter .dbk-sb-filter-kbd {
+        display: none;
+    }
+
+    // hamburger: 40 x 40 tap target
+    .main-header .menu-collapse {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        margin-left: 12px;
+        border-radius: var(--dbk-radius-sm);
+
+        &:focus-visible {
+            outline: 0;
+            box-shadow: var(--dbk-focus-ring);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .main-sidebar,
+    .main-sidebar .sidebar-menu li > a.nav-item,
+    .main-sidebar .sidebar-menu li > button.nav-item,
+    .main-sidebar .sidebar-menu li .accordionItemContent a,
+    .main-sidebar .sidebar-menu li .dbk-sb-group-items a {
+        transition: none !important;
+    }
+}
+
+// ---------------------------------------------------------------- topbar: page title + breadcrumbs
+// components/app-title.blade.php renders <h2>[title][crumbs]</h2>; show the crumbs as a small line above the title.
+.main-header .page-title .page-heading h2 {
+    flex-direction: column-reverse;
+    align-items: flex-start !important;
+    justify-content: center;
+    padding-right: var(--dbk-space-4) !important;
+
+    > span:first-child {
+        max-width: min(560px, 42vw) !important;
+        color: var(--dbk-text);
+        font-size: 18px;
+        line-height: 24px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+    }
+
+    > span + span {
+        max-width: min(560px, 42vw) !important;
+        margin-left: 0 !important;
+        margin-bottom: 1px;
+        color: var(--dbk-text-muted) !important;
+        font-size: 12px !important;
+        line-height: 16px;
+        font-weight: 400 !important;
+
+        a {
+            color: var(--dbk-text-muted) !important;
+
+            &:hover {
+                color: var(--dbk-accent) !important;
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+.main-header .page-header-right .header-icon-box:focus-visible {
+    outline: 0;
+    box-shadow: var(--dbk-focus-ring);
+    border-radius: var(--dbk-radius-sm);
+}

@@ -1,0 +1,362 @@
+// AFV UI package partial: layout (S9 / P2). Owned by one package agent; compiled by S9.
+// Page background & content gutter, mobile page title, AFV cards (x-cards.data / widget),
+// filter bar (x-filters.filter-box), empty states (x-cards.no-record) and the page preloader.
+// Only CSS variables (--dbk-*) — see docs/mvp/phase2/ui-guidelines.md §3, §4, §9.
+
+// ---------------------------------------------------------------- page background & gutter
+body:not(.dark-theme) .main-container.bg-additional-grey {
+    background-color: var(--dbk-bg);
+}
+
+.main-container > .content-wrapper {
+    padding: var(--dbk-space-6);
+
+    @media (max-width: 991.98px) {
+        padding: var(--dbk-space-4) var(--dbk-space-4) var(--dbk-space-8);
+    }
+
+    @media (max-width: 575.98px) {
+        padding: var(--dbk-space-3) var(--dbk-space-3) var(--dbk-space-8);
+    }
+}
+
+// ---------------------------------------------------------------- skip link (layouts/app, WCAG 2.4.1)
+.dbk-skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 100000;
+    padding: 10px 16px;
+    border-radius: var(--dbk-radius-sm);
+    background: var(--dbk-surface);
+    color: var(--dbk-accent-text);
+    font-size: var(--dbk-fs-base);
+    font-weight: 600;
+    box-shadow: var(--dbk-shadow-lg);
+    transform: translateY(-200px); // fully off screen, shadow included
+
+    &:focus,
+    &:focus-visible {
+        transform: none;
+        color: var(--dbk-accent-text);
+        text-decoration: underline;
+    }
+}
+
+// the skip-link target is the whole content area — no focus frame around it
+#fullscreen:focus { outline: none !important; box-shadow: none !important; }
+
+// ---------------------------------------------------------------- page title (mobile copy of the topbar title)
+.main-container > .page-title.dbk-layout-title {
+    @media (max-width: 991.98px) {
+        padding: var(--dbk-space-5) var(--dbk-space-4) var(--dbk-space-1);
+
+        .page-heading h2 {
+            flex-wrap: wrap;
+            align-items: baseline !important;
+            row-gap: 2px;
+            padding-right: 0 !important;
+        }
+
+        .dbk-layout-title-text {
+            max-width: 100%;
+            font-size: 18px;
+            line-height: 24px;
+            font-weight: 600;
+            color: var(--dbk-text);
+            letter-spacing: -0.01em;
+        }
+
+        .dbk-layout-crumbs {
+            display: block;
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin-left: 0 !important;
+            font-size: var(--dbk-fs-xs) !important;
+            line-height: 16px;
+            font-weight: 400 !important;
+            color: var(--dbk-text-muted) !important;
+
+            a { color: var(--dbk-text-muted) !important; }
+            a:hover { color: var(--dbk-accent) !important; }
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        padding: var(--dbk-space-4) var(--dbk-space-3) 0;
+    }
+}
+
+// Pages with their own page header (<x-dbk.page-header> → h1.dbk-page-title) showed the title twice on phones:
+// keep only the breadcrumb line of the mobile copy, the h1 right below it carries the title. Not when a filter bar
+// sits between the two (the title would only appear after the filters).
+@media (max-width: 991.98px) {
+    // title + breadcrumbs above the filter bar (layouts/app order): a little air before the bar
+    .main-container > .page-title.dbk-layout-title:has(+ .filter-box) { padding-bottom: var(--dbk-space-3); }
+
+    .main-container:has(.dbk-page-title):not(:has(> .filter-box)) > .page-title.dbk-layout-title {
+        padding-bottom: 0;
+
+        .dbk-layout-title-text { display: none !important; }
+    }
+}
+
+// ---------------------------------------------------------------- cards (AFV .card / x-cards.data / panels)
+.main-container {
+    .card.b-shadow-4:not(.task-card):not(.rounded-0),
+    .bg-white.rounded.b-shadow-4:not(.dropdown-menu):not(.task-card) {
+        border: 1px solid var(--dbk-border) !important;
+        border-radius: var(--dbk-radius) !important;
+        box-shadow: var(--dbk-shadow-sm);
+    }
+
+    .card.b-shadow-4:not(.task-card):not(.rounded-0) {
+        overflow: hidden; // keep header/table corners inside the radius
+    }
+
+    .card.dbk-layout-card {
+        > .card-body { padding: var(--dbk-space-4) var(--dbk-space-5) var(--dbk-space-5); }
+        > .card-body.p-0 { padding: 0; }
+        > .dbk-layout-card-header + .card-body { padding-top: var(--dbk-space-3); }
+        > .dbk-layout-card-header + .card-body.p-0 { padding-top: 0; }
+    }
+
+    .dbk-layout-card-header {
+        gap: var(--dbk-space-3);
+        min-height: 56px;
+        padding: var(--dbk-space-4) var(--dbk-space-5) var(--dbk-space-3);
+        background: transparent;
+        border-bottom: 1px solid var(--dbk-border);
+    }
+
+    .dbk-layout-card-title {
+        min-width: 0;
+        margin: 0;
+        font-size: var(--dbk-fs-lg);
+        line-height: 22px;
+        font-weight: 600;
+        color: var(--dbk-text);
+    }
+
+    .dbk-layout-card-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--dbk-space-2);
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 575.98px) {
+        .card.dbk-layout-card > .card-body { padding: var(--dbk-space-3) var(--dbk-space-4) var(--dbk-space-4); }
+        .card.dbk-layout-card > .card-body.p-0 { padding: 0; }
+        .dbk-layout-card-header { padding: var(--dbk-space-3) var(--dbk-space-4); min-height: 48px; }
+    }
+}
+
+// ---------------------------------------------------------------- stat widget (x-cards.widget)
+.main-container .dbk-layout-widget {
+    gap: var(--dbk-space-3);
+    padding: var(--dbk-space-4) var(--dbk-space-5) !important;
+    border: 1px solid var(--dbk-border) !important;
+    border-radius: var(--dbk-radius) !important;
+    box-shadow: var(--dbk-shadow-sm);
+
+    .dbk-layout-widget-body { min-width: 0; }
+
+    .dbk-layout-widget-title {
+        margin-bottom: var(--dbk-space-1);
+        font-size: var(--dbk-fs-sm) !important;
+        line-height: 18px;
+        font-weight: 500 !important;
+        color: var(--dbk-text-muted) !important;
+
+        .fa-question-circle { color: var(--dbk-text-muted); opacity: 0.7; }
+    }
+
+    .dbk-layout-widget-value {
+        font-size: var(--dbk-fs-xl) !important;
+        line-height: 28px;
+        font-weight: 600 !important;
+        color: var(--dbk-text) !important;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dbk-layout-widget-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--dbk-neutral-soft);
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+
+        i { font-size: 16px !important; color: var(--dbk-text-muted) !important; }
+    }
+}
+
+// ---------------------------------------------------------------- filter bar (x-filters.filter-box)
+.dbk-layout-filters {
+    > form > .filter-box {
+        min-height: 56px;
+        align-items: center;
+        padding: 0 var(--dbk-space-6);
+        box-shadow: none;
+        border-bottom: 1px solid var(--dbk-border);
+    }
+
+    .select-box,
+    .task-search {
+        align-items: center;
+
+        @media (min-width: 768px) { min-height: 40px; }
+    }
+
+    // filter labels: muted, never broken into two lines
+    .select-box > p,
+    .select-box > label {
+        font-size: var(--dbk-fs-sm) !important;
+        color: var(--dbk-text-muted) !important;
+        white-space: nowrap;
+    }
+
+    .select-box .form-control,
+    .select-box .bootstrap-select .filter-option-inner-inner {
+        color: var(--dbk-text);
+    }
+
+    // legacy custom.scss capitalises every word of the selected value ("Всички Юридически Лица", "Октомври 2026");
+    // Bulgarian (and English sentence case) keeps the text as written
+    .select-box .bootstrap-select .dropdown-toggle,
+    .select-box .bootstrap-select .btn-light { text-transform: none !important; }
+
+    .task-search .input-group {
+        border-radius: var(--dbk-radius-sm) !important;
+        overflow: hidden;
+    }
+
+    .more-filters > a {
+        font-size: var(--dbk-fs-sm) !important;
+        color: var(--dbk-text-2);
+        cursor: pointer;
+
+        &:hover { color: var(--dbk-accent); }
+    }
+
+    @media (max-width: 991.98px) {
+        > form > .filter-box { padding: var(--dbk-space-2) var(--dbk-space-4); }
+    }
+
+    @media (max-width: 767.98px) {
+        > form > .filter-box { row-gap: var(--dbk-space-1); }
+
+        .select-box,
+        .task-search {
+            width: 100%;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        // one label column: long labels ("Юридическо лице") wrap instead of pushing their field out of line
+        .select-box > p,
+        .select-box > label {
+            flex: 0 0 112px;
+            min-width: 112px;
+            white-space: normal;
+            line-height: 18px;
+        }
+
+        .select-box .select-status { flex: 1 1 auto; min-width: 0; }
+
+        .more-filters { padding-top: var(--dbk-space-1) !important; }
+    }
+
+    @media (max-width: 575.98px) {
+        > form > .filter-box { padding: var(--dbk-space-2) var(--dbk-space-3); }
+    }
+}
+
+body:not(.dark-theme) .dbk-layout-filters > form > .filter-box {
+    background-color: var(--dbk-surface) !important;
+}
+
+// ---------------------------------------------------------------- empty states (x-cards.no-record)
+.dbk-empty.dbk-layout-empty {
+    padding: var(--dbk-space-6) var(--dbk-space-3);
+
+    .dbk-empty-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .dbk-empty-text {
+        margin: 0;
+        color: var(--dbk-text-muted);
+    }
+}
+
+.dbk-layout-empty-row > td {
+    border-bottom: 0 !important;
+}
+
+// DataTables "no data" row — same muted, roomy look as the empty state
+.main-container .dataTables_wrapper td.dataTables_empty {
+    padding: var(--dbk-space-7) var(--dbk-space-3) !important;
+    color: var(--dbk-text-muted) !important;
+    font-size: var(--dbk-fs-sm);
+    text-align: center;
+}
+
+// ---------------------------------------------------------------- page preloader (JS hooks unchanged)
+.preloader-container .spinner-border {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--dbk-border);
+    border-top-color: var(--dbk-accent);
+    animation: dbk-layout-spin 0.8s linear infinite;
+}
+
+body:not(.dark-theme) .preloader-container {
+    background: var(--dbk-bg);
+}
+
+@keyframes dbk-layout-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .preloader-container .spinner-border { animation-duration: 2s; }
+}
+
+// ---------------------------------------------------------------- dark theme (legacy dark-theme.scss uses !important)
+body.dark-theme {
+    .main-container {
+        .card.b-shadow-4:not(.task-card):not(.rounded-0),
+        .bg-white.rounded.b-shadow-4:not(.dropdown-menu):not(.task-card),
+        .dbk-layout-widget {
+            border-color: var(--dbk-border) !important;
+            box-shadow: none;
+        }
+
+        .dbk-layout-card-header { border-bottom-color: var(--dbk-border) !important; }
+        .dbk-layout-widget-icon { background: var(--dbk-neutral-soft); }
+    }
+
+    .dbk-layout-filters > form > .filter-box {
+        box-shadow: none;
+        border-bottom-color: var(--dbk-border);
+    }
+
+    // legacy dark-theme.scss forces the column separators with !important, also where the filters stack (≤ 767 px;
+    // `.border-right-grey-sm-0` removes them in the light theme) → stray vertical lines along the stacked filters
+    @media (max-width: 767.98px) {
+        .dbk-layout-filters {
+            .border-right-grey,
+            .border-left-grey,
+            .border-right,
+            .border-left,
+            .more-filters {
+                border-left: 0 !important;
+                border-right: 0 !important;
+            }
+        }
+    }
+}
