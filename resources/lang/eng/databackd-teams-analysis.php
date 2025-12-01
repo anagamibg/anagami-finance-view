@@ -1,0 +1,206 @@
+<?php
+
+return [
+    'menu' => 'Analysis Requests',
+    'title' => 'Analysis Requests',
+    'subtitle' => 'Monthly tasks for analyses, summaries and reports: track the board, assign specialists and deliver the results.',
+    'subtitle_client' => 'Your monthly requests for analyses, summaries and reports to the team: status, results and ratings.',
+    'new_request' => 'New request',
+    'edit_request' => 'Edit request',
+    'back_to_list' => 'All requests',
+    'unassigned' => 'Not assigned',
+
+    'filters' => [
+        'client' => 'Client',
+        'specialist' => 'Specialist',
+        'type' => 'Type',
+        'month' => 'Month',
+        'all' => 'All',
+        'clear' => 'Clear filters',
+    ],
+
+    'kpi' => [
+        'open' => 'Open requests',
+        'overdue' => 'Overdue',
+        'delivered_month' => 'Delivered this month',
+        'avg_rating' => 'Average rating',
+    ],
+
+    'view' => [
+        'kanban' => 'Board',
+        'list' => 'List',
+    ],
+
+    'kanban' => [
+        'empty' => 'No requests',
+    ],
+
+    'fields' => [
+        'title' => 'Title',
+        'client' => 'Client',
+        'type' => 'Type',
+        'priority' => 'Priority',
+        'status' => 'Status',
+        'due_date' => 'Due date',
+        'assignee' => 'Specialist',
+        'rating' => 'Rating',
+        'description' => 'Description',
+        'period_from' => 'Data period from',
+        'period_to' => 'Data period to',
+        'period' => 'Data period',
+        'recurrence' => 'Repeat',
+        'team_request' => 'Team request',
+        'created' => 'Created',
+        'parent' => 'Previous request',
+        'next_instance' => 'Next request',
+        'delivered_at' => 'Delivered on',
+    ],
+
+    'empty' => [
+        'title' => 'No analysis requests yet',
+        'text' => 'Create a request for a report, analysis or forecast and the team will pick it up.',
+        'filtered' => 'No requests match the filters',
+        'text_client' => 'Ask the team for a report, analysis, budget or forecast - describe what you need and by when, and the result will appear here.',
+    ],
+
+    'form' => [
+        'select_client' => 'Select client',
+        'title_placeholder' => 'e.g. Monthly profit and loss analysis',
+        'description_placeholder' => 'What exactly do you need, which data and indicators matter, in what form...',
+        'recurrence_help' => 'A repeating request is created again after it is delivered.',
+        'file' => 'Source data (optional)',
+        'file_help' => 'E.g. an Excel trial balance or a statement. Up to 20 MB; only you and the team can see the file.',
+        'attachment_comment' => 'Source data for the request.',
+        'no_team_request' => 'Not linked to a team request',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
+    ],
+
+    'sections' => [
+        'request' => 'Request',
+        'result' => 'Result',
+        'comments' => 'Comments',
+        'people' => 'People',
+        'manage' => 'Manage',
+        'rating' => 'Rating',
+    ],
+
+    'result' => [
+        'download' => 'Download result',
+        'open_link' => 'Open report',
+        'none' => 'The result has not been delivered yet.',
+        'file' => 'Result file',
+        'replace_help' => 'A new file replaces the current one.',
+        'saved_report' => 'Saved report or forecast',
+        'saved_report_none' => 'No link to a screen',
+        'link' => 'Link',
+        'mark_delivered' => 'Mark the request as delivered',
+        'save' => 'Save result',
+    ],
+
+    'link_targets' => [
+        'saved_reports' => 'Saved reports',
+        'pnl' => 'Profit and loss',
+        'cashflow' => 'Cash flow',
+        'dashboard' => 'Reports dashboard',
+        'ratios' => 'Financial ratios',
+        'comparison' => 'Comparison',
+        'consolidation' => 'Consolidation',
+        'forecasts' => 'Forecasts',
+        'budgets' => 'Budgets',
+        'variance' => 'Budget vs Actual',
+    ],
+
+    'comments' => [
+        'client' => 'Client',
+        'attachment' => 'Attachment',
+        'none' => 'No comments yet.',
+        'placeholder' => 'Write a comment...',
+        'file_help' => 'Up to 20 MB. Only the participants of the request can see the file.',
+        'attach' => 'Attach a file',
+        'send' => 'Send',
+    ],
+
+    'rating' => [
+        'placeholder' => 'How satisfied are you with the result? (optional)',
+        'star' => ':value of 5',
+        'submit' => 'Submit rating',
+        'update' => 'Update rating',
+        'not_rated' => 'The client has not rated this request yet.',
+        'after_delivery' => 'You can rate the request after it is delivered.',
+    ],
+
+    'messages' => [
+        'created' => 'The request was created.',
+        'updated' => 'The request was saved.',
+        'status_changed' => 'The status was changed.',
+        'deliverable_saved' => 'The result was saved.',
+        'rated' => 'Thank you for your rating.',
+        'rate_not_allowed' => 'You can rate a request only after it is delivered.',
+        'commented' => 'The comment was added.',
+    ],
+
+    'validation' => [
+        'period_order' => 'The end of the period cannot be before its start.',
+        'due_past' => 'The due date cannot be in the past.',
+        'team_request_client' => 'The selected team request belongs to another client.',
+        'link' => 'Enter a valid link (https://... or a path inside the application).',
+    ],
+
+    'attributes' => [
+        'client_id' => 'client',
+        'type' => 'type',
+        'title' => 'title',
+        'description' => 'description',
+        'period_from' => 'period start',
+        'period_to' => 'period end',
+        'due_date' => 'due date',
+        'priority' => 'priority',
+        'recurrence' => 'repeat',
+        'team_request_id' => 'team request',
+        'assigned_to' => 'specialist',
+        'status' => 'status',
+        'deliverable_file' => 'result file',
+        'deliverable_link' => 'link',
+        'client_rating' => 'rating',
+        'client_feedback' => 'feedback',
+        'comment' => 'comment',
+        'file' => 'attachment',
+    ],
+
+    'notify' => [
+        'action' => 'Open request',
+        'created_subject' => 'New analysis request from :client',
+        'line_title' => 'Title',
+        'line_type' => 'Type',
+        'line_due' => 'Due date',
+        'line_status' => 'Status',
+        'status_subject' => 'The request ":title" is now: :status',
+        'comment_subject' => ':author commented on the request ":title"',
+    ],
+
+    'howto' => [
+        'title' => 'How It Works',
+        'send_title' => '1. You describe the task',
+        'send_text' => 'What you need, for which period and by when. Attach the source data if you have it.',
+        'work_title' => '2. A specialist takes it',
+        'work_text' => 'You will be notified when work starts. Questions and clarifications are in the comments.',
+        'result_title' => '3. You get the result',
+        'result_text' => 'A file or a link to a report in the system - in the same request, with a notification.',
+        'rate_title' => '4. You rate it',
+        'rate_text' => 'With 1 to 5 stars. Repeating requests (monthly, quarterly) are created again automatically.',
+    ],
+
+    'status_hint' => [
+        'client_new' => 'The request is received and waits for a specialist.',
+        'client_in_progress' => 'A specialist is working on the request. Any questions will appear in the comments.',
+        'client_review' => 'The result is being checked before delivery.',
+        'client_delivered' => 'The result is ready - download it or open the link and rate the work.',
+        'client_closed' => 'The request is closed.',
+        'staff_new' => 'Assign a specialist and move the request to "In progress".',
+        'staff_in_progress' => 'Upload the result or a link to a report when it is ready.',
+        'staff_review' => 'Check the result and deliver it to the client.',
+        'staff_delivered' => 'The client is notified and can rate the result.',
+        'staff_closed' => 'The request is closed.',
+    ],
+];
