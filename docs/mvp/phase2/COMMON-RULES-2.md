@@ -1,0 +1,26 @@
+# Общи правила — фаза 2 (S6–S10)
+
+Прочети изцяло, преди да започнеш. После прочети `CLAUDE.md`, `docs/mvp/COMMON-RULES.md` (правилата от фаза 1 важат, освен ако тук пише друго), `docs/mvp/phase2/00-plan.md` и **всички** `docs/mvp/handoff/*.md`. Ако handoff противоречи на промпта ти, handoff-ът е с предимство.
+
+## Какво е различно спрямо фаза 1
+1. **Без локални сървъри** (`php artisan serve`, `npm run watch`, всичко, което слуша на порт). Проверка на страници — `php docs/mvp/tools/smoke.php` (вкл. `--email=` за служител `g.petrov@demofinans.bg` и клиент `p.yordanov@balkan.bg`). Визуална проверка — с инструмента на S9 `docs/mvp/tools/snapshot.*` (рендира HTML през PHP и прави PNG с headless Chromium от файл, без сървър), ако вече съществува.
+   - **`snapshot` (S9):** `php docs/mvp/tools/snapshot.php <url> [--email=] [--out=<префикс>] [--only=desktop|mobile] [--viewport] [--dark] [--scss=<файл>]` → `<префикс>-desktop.png` (1440×900), `<префикс>-mobile.png` (390×844) и `<префикс>.html` (с `<base href="file://…/public/">`); по подразбиране в `storage/app/snapshots/`. Цялата страница (до 6000 px), освен с `--viewport`. Браузърът (headless Chromium от Playwright в `kukie.io/kukie/node_modules/playwright`) отваря `http://127.0.0.1:8123/<url>`, но **нищо не слуша на порта** — всяка заявка се прихваща: файловете от `public/` се четат от диска, а страницата и AJAX заявките (DataTables и др.) се рендират от PHP worker през Laravel kernel като избрания потребител. `--scss=resources/scss/databackd/_<пакет>.scss` компилира partial-а с локалния sass и го инжектира — за преглед на CSS без `npm run prod`. Отпечатва PHP exceptions и JS грешките на страницата. Разглеждай PNG-тата с Read.
+   - **UI насоки:** `docs/mvp/phase2/ui-guidelines.md` — палитра, компоненти `dbk-*` (`resources/scss/databackd/_components.scss`, Blade `x-dbk.*`), графики само през глобалния `dbkChart` (`resources/js/databackd-charts.js`; `Chart.min.js` вече се зарежда от `layouts/app` — не го включвай отново).
+2. **Без branch-ове, без PR, без push, без деплой** — освен S10. Работи на текущия branch, накрая един (или няколко логични) локални commit-а само със своите файлове. Датата на commit-а е реалната текуща дата. Без AI attribution.
+3. **Production (`ssh databackd`, https://databackd.com) — само четене** (S6 за одит), освен S10. Никакви промени на сървъра, в базата му или в акаунтите.
+4. **До 10 паралелни агента на сесия** — по схемата Фаза 0 / Фаза 1 / Фаза 2 от `docs/mvp/COMMON-RULES.md` („Работа с до 10 паралелни агента“), включително правилата за агенти (копирай ги в brief-овете). Пускай пакетите наведнъж, в едно съобщение.
+5. **Собственост на файлове между сесиите** (S6, S8, S9 работят едновременно):
+   - **S9** притежава визуалния слой: `resources/scss/**`, `resources/js/**`, `webpack.mix.js`, `public/css/**`, `public/js/**` (компилирани), `resources/views/layouts/**`, `resources/views/sections/**` (сайдбар, топбар, менюта), `resources/views/components/**`, и **визуалната** част (разметка/класове/графики) на `resources/views/databackd/**` и `resources/views/dashboard/**`. Само S9 пуска `npm run prod`.
+   - **S8** притежава новите си файлове, `resources/views/super-admin/packages/**`, `app/Http/Controllers/SuperAdmin/PackageController.php`, `app/Console/Kernel.php` (scheduler), `config/databackd.php` (нови ключове), `app/Helper/databackd.php` и middleware-а `HideBillingPages` (видимост за супер админ), menu файловете `resources/views/databackd/menu/*.blade.php` (само `@if` проверки за модули) и `routes/databackd/**` (middleware за модули).
+   - **S6** притежава контролерите/requests/middleware/services в `app/` под `Databackd/**` за поправки по сигурността, `config/` (без `databackd.php`), `app/Http/Kernel.php`, `.gitignore`. Ако поправка по сигурността изисква промяна във view или файл на S8/S9 — опиши я в handoff-а за S10, не я прави.
+   - **S7** (вълна 2) притежава `resources/lang/**` и **текстовете** във всички Blade/JS файлове (замяна на твърд текст с `__()`), след като S6/S8/S9 са commit-нали.
+   - Ако ти трябва промяна в чужд файл — опиши я точно в handoff-а си (секция „За S10“), не я прави.
+6. Миграции: `php artisan migrate --isolated`, всяка миграция написана наведнъж; изпълнена миграция не се редактира.
+7. Демо данни: само `php artisan databackd:demo --only=<твоя seeder>` локално; нови seeders — `database/seeders/Databackd/Demo/<NN><Name>.php` с префикси: S8 → 46–49, S9 → няма, S6 → няма.
+8. `.env`, `.env.stage.backup`, `Modules/`, `.claude/` никога не се commit-ват.
+
+## Край на сесията
+1. Всички smoke проверки на засегнатите области минават (без нови FAIL спрямо handoff-ите от фаза 1); `php artisan databackd:check-formulas`, `check-consolidation`, `check-forecasts` минават.
+2. `docs/mvp/handoff/0N-<тема>.md` (S6 → `06-security.md`, S7 → `07-translation.md`, S8 → `08-packages-gaps.md`, S9 → `09-ui-ux.md`, S10 → `10-review-deploy.md`) — със същите раздели като във фаза 1 **плюс „За S10: какво да се деплойне“**: списък на файловете (вкл. компилирани assets и `resources/lang/bg/**`), миграции, seeders за компания 17, команди след деплой (кешове, scheduler/cron), рискове.
+3. `docs/mvp/features/0N-<тема>.md` — техническа документация на промените.
+4. Локален commit само на своите файлове. Без push.
